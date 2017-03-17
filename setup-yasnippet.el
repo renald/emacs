@@ -14,4 +14,4 @@
 (yas/global-mode 1)
 
 (add-to-list 'auto-mode-alist '(".*snippets/.*" . snippet-mode))
-(provide 'setup-snippets)
+(provide 'setup-yasnippet)
