@@ -34,6 +34,7 @@
 (require 'os-dependence)
 (Maclaunch (require 'setup-osx))
 ;(require 'setup-ivy)
+(require 'setup-packages)
 (require 'setup-appearance)
 (require 'setup-keyboard)
 (require 'setup-dirs)
