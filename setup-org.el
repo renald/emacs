@@ -118,6 +118,12 @@
 ; From contrib. Allows you to specify a git file like [[git:/path/to/file::searchstring]]
 ;(require 'org-git-link)
 
+(add-hook 'org-mode-hook
+          (let ((original-command (lookup-key org-mode-map [tab])))
+            `(lambda ()
+               (setq yas-fallback-behavior
+                     '(apply ,original-command))
+               (local-set-key [tab] 'yas-expand))))
 
 (provide 'setup-org)
 
@@ -150,3 +156,4 @@
               (org-trello-mode)))))
 
 ;(add-hook 'text-mode-hook 'turn-on-orgstruct++)
+

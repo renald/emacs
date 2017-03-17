@@ -38,13 +38,12 @@
 (require 'setup-keyboard)
 (require 'setup-dirs)
 
+(require 'setup-yasnippet)
+
 (require 'setup-org)
 
 (require 'setup-magit)
 (require 'setup-markdown)
-
-(require 'setup-yasnippet)
-(require 'setup-scala)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
