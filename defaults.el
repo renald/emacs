@@ -114,4 +114,7 @@
 	try-complete-lisp-symbol-partially
 	try-complete-lisp-symbol))
 
+;; Do not create lockfiles, as they are useless on my laptop
+(setq create-lockfiles nil)
+
 (provide 'defaults)
