@@ -30,6 +30,7 @@
 
 ; the name says is all
 (require 'defaults)
+(require 'rk-functions)
 ; macros to execute code only on certain platform
 (require 'os-dependence)
 (Maclaunch (require 'setup-osx))
@@ -45,6 +46,7 @@
 
 (require 'setup-magit)
 (require 'setup-markdown)
+(require 'setup-multiple-cursors)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
