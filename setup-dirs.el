@@ -35,7 +35,7 @@
 (setq savehist-autosave-interval 60)     ;; save every minute (default: 5 min)
 ; location of the history file
 (setq savehist-file
-      (concat emacs-tmp-dir "savehist")) ;; keep my home clean
+      (concat emacs-tmp-dir "/savehist")) ;; keep my home clean
 ; turn it on!
 (savehist-mode t)                       ;; do customization before activation
 
