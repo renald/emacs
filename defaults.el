@@ -50,10 +50,13 @@
 ;; Lines should be 100 characters wide, not 72 or 80. We have real resolutions, now
 (setq-default fill-column 100)
 (add-hook 'text-mode-hook 'turn-on-auto-fill)
+;; try visual-line-mode for a while...
+(remove-hook 'text-mode-hook #'turn-on-auto-fill)
+(add-hook 'text-mode-hook 'turn-on-visual-line-mode)
 
 ;; Save a list of recent files visited. (open recent file with C-x f)
 (recentf-mode 1)
-(setq recentf-max-saved-items 100) ;; just 20 is too recent
+(setq recentf-max-saved-items 1000) ;; just 20 is too recent
 
 ;; Undo/redo window configuration with C-c <left>/<right>
 (winner-mode 1)
