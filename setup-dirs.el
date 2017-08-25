@@ -10,6 +10,10 @@
 ; backup directory
 (defvar backup-dir (concat emacs-tmp-dir "/backups/"))
 (setq backup-directory-alist (list (cons "." backup-dir)))
+; diskspace is cheap!
+(setq delete-old-versions -1)
+(setq version-control t)
+(setq vc-make-backup-files t)
 
 ; saveplace: save location in file when saving files
 (setq save-place-file (concat emacs-tmp-dir "/saveplace"))
@@ -17,9 +21,16 @@
 (require 'saveplace)                   ;; get the package
 
 ; savehist: save some history
-; also save my search entries
+; also save my search entries, see http://fasciism.com/2017/01/13/remembering-history/
 (setq savehist-additional-variables
-  '(search ring regexp-search-ring))
+      '(search-ring
+        kill-ring
+        extended-command-history
+        buffer-name-history
+        file-name-history
+        compile-command
+        regexp-search-ring))
+
 ; save every minute
 (setq savehist-autosave-interval 60)     ;; save every minute (default: 5 min)
 ; location of the history file
