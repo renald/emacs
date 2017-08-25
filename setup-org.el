@@ -1,5 +1,5 @@
 (rk/add-local-lib-to-path "org-mode/lisp")
-;(rk/add-local-lib-to-path "org-contrib")
+(rk/add-local-lib-to-path "org-mode/contrib/lisp")
 
 (require 'org)
 
@@ -23,16 +23,40 @@
 (global-set-key "\C-cb" 'org-iswitchb)
 (global-set-key "\C-cr" 'org-capture)
 
+
 ;; Templates
+
+
+;;; I want notes organised per day. Thanks
+;;; http://www.howardism.org/Technical/Emacs/journaling-org.html for showing how to do this!
+
+(setq work-notes-dir
+  (concat (or (getenv "WORKDIR") (concat (getenv "HOME") "/Work/gdd"))
+          "/Notes/"))
+
+(defun get-notes-file-today ()
+  "Return filename for today's journal entry."
+  (let ((daily-name (format-time-string "%Y%m%d")))
+    (expand-file-name (concat work-notes-dir daily-name))))
+
+;; Set to orgmode by default when viewing notes
+;(setq work-notes-rx (concat work-notes-dir ".*/[0-9]*$"))
+(add-to-list 'auto-mode-alist '("Notes.*/[0-9]*$" . org-mode))
+
 (setq org-capture-templates
-      '(("t" "Todo"    entry (file+headline "~/org/todo.org" "Tasks")
-         "* TODO %?\n  %i\n  %a")
-        ("T" "Work - Backlog" entry (file "~/org/operations/operations.trello")
-         "* BACKLOG %?\n")
-        ("!" "Work - Today" entry (file "~/org/operations/operations.trello")
-         "* TODAY %?\n")
+      '(
+;        ("t" "Todo"    entry (file+headline "~/org/todo.org" "Tasks")
+;         "* TODO %?\n  %i\n  %a")
+;        ("T" "Work - Backlog" entry (file "~/org/operations/operations.trello")
+;         "* BACKLOG %?\n")
+;        ("!" "Work - Today" entry (file "~/org/operations/operations.trello")
+;         "* TODAY %?\n")
         ("j" "Journal" entry (file "~/Drives/Dropbox (Personal)/personal/journal.org" )
-         "* %^u\n%?\n** Leerpunten\n** Meer doen\n** Dankbaar\n")))
+         "* %^u\n%?\n** Leerpunten\n** Meer doen\n** Dankbaar\n")
+        ("n" "Note" entry (file (get-notes-file-today))
+         "* %<%H:%M:%S>\n%?\n"
+         :empty-lines 1)
+        ))
 
 ;(setq org-agenda-skip-scheduled-if-done 't)
 (setq org-log-done nil)
@@ -110,10 +134,14 @@
 
 ;(require 'ox-icalendar)
 
-;(require 'org-mac-link)
-;(add-hook 'org-mode-hook
-;          (lambda ()
-;            (define-key org-mode-map (kbd "C-c g") 'org-mac-grab-link)))
+;; From contrib. Open something in one of the following applications:
+;; 1. 
+(require 'org-mac-link)
+(add-hook 'org-mode-hook
+          (lambda ()
+            (define-key org-mode-map (kbd "C-c g") 'org-mac-grab-link)))
+
+
 
 ; From contrib. Allows you to specify a git file like [[git:/path/to/file::searchstring]]
 ;(require 'org-git-link)
@@ -146,14 +174,15 @@
 ;        next-pt))))
 
 ;; org-trello major mode for all .trello files
-(add-to-list 'auto-mode-alist '("\\.trello$" . org-mode))
+;(add-to-list 'auto-mode-alist '("\\.trello$" . org-mode))
 
 ;; add a hook function to check if this is trello file, then activate the org-trello minor mode.
-(add-hook 'org-mode-hook
-          (lambda ()
-            (let ((filename (buffer-file-name (current-buffer))))
-              (when (and filename (string= "trello" (file-name-extension filename)))
-              (org-trello-mode)))))
+;(add-hook 'org-mode-hook
+;          (lambda ()
+;;            (let ((filename (buffer-file-name (current-buffer))))
+;              (when (and filename (string= "trello" (file-name-extension filename)))
+;              (org-trello-mode)))))
 
 ;(add-hook 'text-mode-hook 'turn-on-orgstruct++)
+
 
