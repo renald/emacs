@@ -14,4 +14,6 @@
 (yas/global-mode 1)
 
 (add-to-list 'auto-mode-alist '(".*snippets/.*" . snippet-mode))
+(add-hook 'hippie-expand-try-functions-list 'yas-hippie-try-expand)
+
 (provide 'setup-yasnippet)
