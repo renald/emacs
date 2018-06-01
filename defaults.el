@@ -47,12 +47,12 @@
 (setq line-number-mode t)
 (setq column-number-mode t)
 
-;; Lines should be 100 characters wide, not 72 or 80. We have real resolutions, now
-(setq-default fill-column 100)
+;; Lines should be 80 characters wide
+(setq-default fill-column 80)
 (add-hook 'text-mode-hook 'turn-on-auto-fill)
 ;; try visual-line-mode for a while...
-(remove-hook 'text-mode-hook #'turn-on-auto-fill)
-(add-hook 'text-mode-hook 'turn-on-visual-line-mode)
+;(remove-hook 'text-mode-hook #'turn-on-auto-fill)
+;(add-hook 'text-mode-hook 'turn-on-visual-line-mode)
 
 ;; Save a list of recent files visited. (open recent file with C-x f)
 (recentf-mode 1)
