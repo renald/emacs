@@ -2,3 +2,10 @@ site-lisp
 target
 tmp
 tmpsavehist
+old-elisp
+*.elc
+init.el
+emacs.d-old
+elpa
+abbrev_defs
+recentf
