@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: Begin org-mode source block
+# key: bsrc
+# --
+#+begin_src $0

@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: End a org-mode source block
+# key: esrc
+# --
+#+end_src

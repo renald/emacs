@@ -1,0 +1,33 @@
+# -*- mode: snippet -*-
+# name: Natural planning template
+# key: new-project
+# --
+
+* $1
+
+** Waarom?
+
+1. $0
+2. 
+3. 
+4. 
+5. 
+6. 
+
+** Uitkomst
+
+** Brainstorm
+
+1. 
+2. 
+3. 
+4. 
+5. 
+6. 
+7. 
+8. 
+9. 
+10.
+
+** Plan
+
