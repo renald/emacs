@@ -2,7 +2,7 @@
 #+TITLE: Emacs Configuration
 #+AUTHOR: Renald Buter
 #+EMAIL: renald.buter@xs4all.nl
-#+DATE: <2018-10-28 14:16:01 buter>
+#+DATE: <2018-10-29 21:44:11 buter>
 #+OPTIONS: toc:nil num:nil
 #+PROPERTY: header-args :tangle yes
 
@@ -139,6 +139,11 @@ Automatically update time stamps, see https://www.emacswiki.org/emacs/TimeStamp.
 ** Other defaults
 
 #+begin_src emacs-lisp
+;; Do not create lockfiles, as they are useless on my laptop
+(setq create-lockfiles nil)
+
+(setq inhibit-startup-screen t)
+
 ;; Allow pasting selection outside of Emacs
 ;(setq x-select-enable-clipboard t)
 (setq select-enable-clipboard t)
@@ -206,7 +211,15 @@ Automatically update time stamps, see https://www.emacswiki.org/emacs/TimeStamp.
 ;; Save a list of recent files visited. (open recent file with C-x f)
 (recentf-mode 1)
 (setq recentf-max-saved-items 1000) ;; just 20 is too recent
+#+end_src
 
+** Windows
+
+=winner-mode= lets you use =C-c <left>= and =C-c <right>= to switch between window configurations. This is
+handy when something has popped up a buffer that you want to look at briefly before returning to whatever you
+were working on. When you're done, press =C-c <left>=.
+
+#+begin_src emacs-lisp
 ;; Undo/redo window configuration with C-c <left>/<right>
 (winner-mode 1)
 
@@ -224,10 +237,13 @@ Automatically update time stamps, see https://www.emacswiki.org/emacs/TimeStamp.
 (global-set-key (kbd "C-M-<right>") 'select-next-window)
 (global-set-key (kbd "C-M-<left>")  'select-previous-window)
 
-(setq inhibit-startup-screen t)
+#+end_src
 
+#+begin_src emacs-lisp
+** Hippie Expand
 (setq hippie-expand-try-functions-list
-      '(try-expand-dabbrev
+      '(yas-hippie-try-expand
+        try-expand-dabbrev
 	try-expand-dabbrev-all-buffers
 	try-expand-dabbrev-from-kill
 	try-complete-file-name-partially
@@ -237,20 +253,137 @@ Automatically update time stamps, see https://www.emacswiki.org/emacs/TimeStamp.
 	try-expand-line
 	try-complete-lisp-symbol-partially
 	try-complete-lisp-symbol))
+#+end_src
+** Abbrev
 
-;; Do not create lockfiles, as they are useless on my laptop
-(setq create-lockfiles nil)
-
-
+#+begin_src emacs-lisp
 ;; Abbrev
-(setq abbrev-file-name             ;; tell emacs where to read abbrev
-      (expand-file-name (concat emacs-root "/abbrev_defs")))
-(setq save-abbrevs 'silent)        ;; save abbrevs when files are saved
+;(setq abbrev-file-name             ;; tell emacs where to read abbrev
+;      (expand-file-name (concat emacs-root "/abbrev_defs")))
+;(setq save-abbrevs 'silent)        ;; save abbrevs when files are saved
+#+end_src
 
-;(provide 'defaults)
+#+NAME: abbrev
+| Base    | Expansion                   |
+|---------+-----------------------------|
+| bc      | because                     |
+| wo      | without                     |
+| gddr    | GoDataDriven                |
+| gddhttp | http://www.godatadriven.com |
+
+#+BEGIN_SRC emacs-lisp :var data=abbrev 
+(mapc (lambda (x) (define-global-abbrev (car x) (cadr x))) (cddr data))
+#+END_SRC
+
+#+RESULTS:
+| gddr    | GoDataDriven                |
+| gddhttp | http://www.godatadriven.com |
+
+#+BEGIN_SRC emacs-lisp 
+(add-hook 'text-mode-hook 'abbrev-mode)
+#+END_SRC
+
+** Directories
+
+Put temporary stuff in a =tmp= directory.
+
+#+begin_src emacs-lisp
+(defvar emacs-tmp-dir
+  (concat emacs-root "/tmp")
+  "base directory where to store files like backups and autosaves ")
+
+; set autosave directory
+; http://snarfed.org/space/gnu%20emacs%20backup%20files
+(defvar autosave-dir (concat emacs-tmp-dir "/autosaves/"))
+(make-directory autosave-dir t)
+
+; backup directory
+(defvar backup-dir (concat emacs-tmp-dir "/backups/"))
+(setq backup-directory-alist (list (cons "." backup-dir)))
+
+; diskspace is cheap!
+(setq delete-old-versions -1)
+(setq version-control t)
+(setq vc-make-backup-files t)
+
+; saveplace: save location in file when saving files
+(setq save-place-file (concat emacs-tmp-dir "/saveplace"))
+(setq-default save-place t)            ;; activate it for all buffers
+(require 'saveplace)                   ;; get the package
+
+; make informative temporary filenames
+(defun make-auto-save-file-name ()
+  (concat autosave-dir
+   (if buffer-file-name
+      (concat "#" (file-name-nondirectory buffer-file-name) "#")
+    (expand-file-name
+     (concat "#%" (buffer-name) "#")))))
+#+end_src
+
+** History
+
+Save some history.
+
+#+begin_src emacs-lisp
+; also save my search entries, see http://fasciism.com/2017/01/13/remembering-history/
+(setq savehist-additional-variables
+      '(search-ring
+        kill-ring
+        extended-command-history
+        buffer-name-history
+        file-name-history
+        compile-command
+        regexp-search-ring))
+
+; save every minute
+(setq savehist-autosave-interval 60)     ;; save every minute (default: 5 min)
+; location of the history file
+(setq savehist-file
+      (concat emacs-tmp-dir "/savehist")) ;; keep my home clean
+; turn it on!
+(savehist-mode t)                       ;; do customization before activation
+#+end_src
+
+** Only bury the scratch buffer
+Bury the =*scratch*= buffer instead of killing it, makes things stay there during the whole Emacs session.
+
+#+begin_src emacs-lisp
+;; http://stackoverflow.com/questions/234963/re-open-scratch-buffer-in-emacs
+(defadvice kill-buffer (around kill-buffer-around-advice activate)
+  (let ((buffer-to-kill (ad-get-arg 0)))
+    (if (equal buffer-to-kill "*scratch*")
+        (bury-buffer)
+      ad-do-it)))
+#+end_src
+
+** Some of my own functions
+
+#+begin_src emacs-lisp
+;;; From http://pages.sachachua.com/.emacs.d/Sacha.html#org04e47b9
+(defun rk/unfill-paragraph (&optional region)
+    "Takes a multi-line paragraph and makes it into a single line of text."
+    (interactive (progn
+                   (barf-if-buffer-read-only)
+                   (list t)))
+    (let ((fill-column (point-max)))
+      (fill-paragraph nil region)))
 
 
+(defun rk/fill-or-unfill-paragraph (&optional unfill region)
+    "Fill paragraph (or REGION).
+  With the prefix argument UNFILL, unfill it instead."
+    (interactive (progn
+                   (barf-if-buffer-read-only)
+                   (list (if current-prefix-arg 'unfill) t)))
+    (let ((fill-column (if unfill (point-max) fill-column)))
+      (fill-paragraph nil region)))
 
+
+;; Source: http://www.emacswiki.org/emacs-en/download/misc-cmds.el
+(defun revert-buffer-no-confirm ()
+    "Revert buffer without confirmation."
+    (interactive)
+    (revert-buffer :ignore-auto :noconfirm))
 #+end_src
 
 * Packages
@@ -389,11 +522,23 @@ thingss I've resorted to using packages.
 (global-set-key "\C-ca" 'org-agenda)
 (global-set-key "\C-cb" 'org-iswitchb)
 (global-set-key "\C-cr" 'org-capture)
+#+end_src
 
+** Speed commands
+
+Enable speed keys, as they can be quite effective. Similar in spirit to hydras.
+
+#+begin_src emacs-lisp
+  (setq org-use-speed-commands t)
+  (add-to-list 'org-speed-commands-user '("W" widen))
+  (add-to-list 'org-speed-commands-user '("N" org-narrow-to-subtree))
+#+end_src
+
+** More
+
+#+begin_src emacs-lisp
 
 ;; Templates
-
-
 ;;; I want notes organised per day. Thanks
 ;;; http://www.howardism.org/Technical/Emacs/journaling-org.html for showing how to do this!
 
@@ -547,13 +692,13 @@ thingss I've resorted to using packages.
 
 ; From contrib. Allows you to specify a git file like [[git:/path/to/file::searchstring]]
 ;(require 'org-git-link)
-
 (add-hook 'org-mode-hook
           (let ((original-command (lookup-key org-mode-map [tab])))
             `(lambda ()
                (setq yas-fallback-behavior
                      '(apply ,original-command))
-               (local-set-key [tab] 'yas-expand))))
+               (local-set-key [tab] 'yas-expand))
+               (abbrev-mode t)))
 
 ;(provide 'setup-org)
 
@@ -655,122 +800,13 @@ thingss I've resorted to using packages.
 (add-hook 'org-mode-hook #'smartparens-mode)
 #+end_src
 
-* setup-dirs.el
-
-#+begin_src emacs-lisp
-(defvar emacs-tmp-dir
-  (concat emacs-root "/tmp")
-  "base directory where to store files like backups and autosaves ")
-
-; set autosave directory
-; http://snarfed.org/space/gnu%20emacs%20backup%20files
-(defvar autosave-dir (concat emacs-tmp-dir "/autosaves/"))
-(make-directory autosave-dir t)
-
-; backup directory
-(defvar backup-dir (concat emacs-tmp-dir "/backups/"))
-(setq backup-directory-alist (list (cons "." backup-dir)))
-; diskspace is cheap!
-(setq delete-old-versions -1)
-(setq version-control t)
-(setq vc-make-backup-files t)
-
-; saveplace: save location in file when saving files
-(setq save-place-file (concat emacs-tmp-dir "/saveplace"))
-(setq-default save-place t)            ;; activate it for all buffers
-(require 'saveplace)                   ;; get the package
-
-; savehist: save some history
-; also save my search entries, see http://fasciism.com/2017/01/13/remembering-history/
-(setq savehist-additional-variables
-      '(search-ring
-        kill-ring
-        extended-command-history
-        buffer-name-history
-        file-name-history
-        compile-command
-        regexp-search-ring))
-
-; save every minute
-(setq savehist-autosave-interval 60)     ;; save every minute (default: 5 min)
-; location of the history file
-(setq savehist-file
-      (concat emacs-tmp-dir "/savehist")) ;; keep my home clean
-; turn it on!
-(savehist-mode t)                       ;; do customization before activation
-
-; make informative temporary filenames
-(defun make-auto-save-file-name ()
-  (concat autosave-dir
-   (if buffer-file-name
-      (concat "#" (file-name-nondirectory buffer-file-name) "#")
-    (expand-file-name
-     (concat "#%" (buffer-name) "#")))))
-
-;; bury *scratch* buffer instead of killing it
-;; http://stackoverflow.com/questions/234963/re-open-scratch-buffer-in-emacs
-(defadvice kill-buffer (around kill-buffer-around-advice activate)
-  (let ((buffer-to-kill (ad-get-arg 0)))
-    (if (equal buffer-to-kill "*scratch*")
-        (bury-buffer)
-      ad-do-it)))
-
-;(provide 'setup-dirs)
-
-#+end_src
-
-* setup-ivy.el
-
-#+begin_src emacs-lisp
-(rk/add-local-lib-to-path "swiper")
-
-(require 'counsel)
-(require 'smex) ;; for history at M-x
-
-(ivy-mode 1)
-
-(setq ivy-use-virtual-buffers t)
-(setq ivy-count-format "[%d/%d] ")
-
-(setq counsel-find-file-at-point t)
-
- ;; Recommended key bindings
-(global-set-key (kbd "C-s") 'swiper)
-(global-set-key (kbd "M-x") 'counsel-M-x)
-(global-set-key (kbd "C-x C-m") 'counsel-M-x)
-(global-set-key (kbd "C-x C-f") 'counsel-find-file)
-(global-set-key (kbd "C-x C-r") 'ivy-recentf)
-(global-set-key (kbd "C-c C-r") 'ivy-resume)
-(global-set-key (kbd "<f6>") 'ivy-resume)
-(global-set-key (kbd "C-h f") 'counsel-describe-function)
-(global-set-key (kbd "C-h v") 'counsel-describe-variable)
-(global-set-key (kbd "C-h l") 'counsel-find-library)
-;(global-set-key (kbd "<f2> i") 'counsel-info-lookup-symbol)
-;(global-set-key (kbd "<f2> u") 'counsel-unicode-char)
-;(global-set-key (kbd "C-c g") 'counsel-git)
-;(global-set-key (kbd "C-c j") 'counsel-git-grep)
-;(global-set-key (kbd "C-c k") 'counsel-ag)
-;(global-set-key (kbd "C-x l") 'counsel-locate)
-;(global-set-key (kbd "C-S-o") 'counsel-rhythmbox)
-(define-key ivy-minibuffer-map (kbd "<return>") 'ivy-alt-done) ;; instead of ivy-done
-(define-key ivy-minibuffer-map (kbd "M-<return>") 'ivy-done)
-;(define-key read-expression-map (kbd "C-r") 'counsel-expression-history)
-
-(setq magit-completing-read-function 'ivy-completing-read)
-
-(require 'flyspell-correct-ivy)
-
-;(provide 'setup-ivy)
-
-#+end_src
-
 * setup-keyboard.el
 
 #+begin_src emacs-lisp
 (global-set-key (kbd "M-/") 'hippie-expand)
 (global-set-key (kbd "C-x C-b") 'ibuffer)
 
-(global-set-key (kbd "C-s") 'isearch-forward-regexp)
+;(global-set-key (kbd "C-s") 'isearch-forward-regexp)
 (global-set-key (kbd "C-r") 'isearch-backward-regexp)
 (global-set-key (kbd "C-M-s") 'isearch-forward)
 (global-set-key (kbd "C-M-r") 'isearch-backward)
@@ -799,6 +835,127 @@ thingss I've resorted to using packages.
 
 ;(provide 'setup-keyboard)
 
+#+end_src
+
+* Ivy, Counsel and Hydra
+
+#+begin_src emacs-lisp
+(rk/add-local-lib-to-path "swiper")
+
+(require 'counsel)
+(require 'smex) ;; for history at M-x
+(require 'hydra)
+
+(ivy-mode 1)
+
+(setq ivy-use-virtual-buffers t)
+(setq ivy-count-format "[%d/%d] ")
+
+(setq counsel-find-file-at-point t)
+
+ ;; Recommended key bindings
+(global-set-key (kbd "C-s") 'counsel-grep-or-swiper)
+(global-set-key (kbd "M-x") 'counsel-M-x)
+(global-set-key (kbd "C-x C-m") 'counsel-M-x)
+(global-set-key (kbd "C-x C-f") 'counsel-find-file)
+(global-set-key (kbd "C-x C-r") 'ivy-recentf)
+(global-set-key (kbd "C-c C-r") 'ivy-resume)
+(global-set-key (kbd "<f6>") 'ivy-resume)
+(global-set-key (kbd "C-h f") 'counsel-describe-function)
+(global-set-key (kbd "C-h v") 'counsel-describe-variable)
+(global-set-key (kbd "C-h l") 'counsel-find-library)
+;(global-set-key (kbd "<f2> i") 'counsel-info-lookup-symbol)
+;(global-set-key (kbd "<f2> u") 'counsel-unicode-char)
+;(global-set-key (kbd "C-c g") 'counsel-git)
+;(global-set-key (kbd "C-c j") 'counsel-git-grep)
+;(global-set-key (kbd "C-c k") 'counsel-ag)
+;(global-set-key (kbd "C-x l") 'counsel-locate)
+;(global-set-key (kbd "C-S-o") 'counsel-rhythmbox)
+(define-key ivy-minibuffer-map (kbd "<return>") 'ivy-alt-done) ;; instead of ivy-done
+(define-key ivy-minibuffer-map (kbd "M-<return>") 'ivy-done)
+;(define-key read-expression-map (kbd "C-r") 'counsel-expression-history)
+
+(setq magit-completing-read-function 'ivy-completing-read)
+
+(require 'flyspell-correct-ivy)
+#+end_src
+
+** Hydras
+
+Many are from the [[https://github.com/abo-abo/hydra/wiki/Emacs][community wiki for Hydra]].
+
+*** Buffer menu
+
+Directly copied from the [[https://github.com/abo-abo/hydra#sample-hydras][sample hydras on github]].
+
+#+begin_src emacs-lisp
+(defhydra hydra-buffer-menu (:color pink
+                             :hint nil)
+  "
+^Mark^             ^Unmark^           ^Actions^          ^Search
+^^^^^^^^-----------------------------------------------------------------
+_m_: mark          _u_: unmark        _x_: execute       _R_: re-isearch
+_s_: save          _U_: unmark up     _b_: bury          _I_: isearch
+_d_: delete        ^ ^                _g_: refresh       _O_: multi-occur
+_D_: delete up     ^ ^                _T_: files only: % -28`Buffer-menu-files-only
+_~_: modified
+"
+  ("m" Buffer-menu-mark)
+  ("u" Buffer-menu-unmark)
+  ("U" Buffer-menu-backup-unmark)
+  ("d" Buffer-menu-delete)
+  ("D" Buffer-menu-delete-backwards)
+  ("s" Buffer-menu-save)
+  ("~" Buffer-menu-not-modified)
+  ("x" Buffer-menu-execute)
+  ("b" Buffer-menu-bury)
+  ("g" revert-buffer)
+  ("T" Buffer-menu-toggle-files-only)
+  ("O" Buffer-menu-multi-occur :color blue)
+  ("I" Buffer-menu-isearch-buffers :color blue)
+  ("R" Buffer-menu-isearch-buffers-regexp :color blue)
+  ("c" nil "cancel")
+  ("v" Buffer-menu-select "select" :color blue)
+  ("o" Buffer-menu-other-window "other-window" :color blue)
+  ("q" quit-window "quit" :color blue))
+
+(define-key Buffer-menu-mode-map "." 'hydra-buffer-menu/body)
+#+end_src
+
+*** Character movement
+
+Goto a line or character.
+
+#+begin_src emacs-lisp
+  (defhydra hydra-goto-line (global-map "M-g"
+                             goto-map ""
+                             :pre (linum-mode 1)
+                             :post (linum-mode -1))
+    "goto-line"
+    ("g" goto-line "go")
+    ("c" goto-char "char")
+    ("m" set-mark-command "mark" :bind nil)
+    ("q" nil "quit"))
+
+#+end_src
+
+*** Transpose
+
+Transpose for many objects.
+
+#+begin_src emacs-lisp
+  (defhydra hydra-transpose (global-map "C-t"
+                             :color "red")
+    "Transpose for many modes and objects."
+    ("c" transpose-chars "characters")
+    ("w" transpose-words "words")
+    ("o" org-transpose-words "Org mode words")
+    ("l" transpose-lines "lines")
+    ("s" transpose-sentences "sentences")
+;    ("e" org-transpose-elements "Org mode elements")
+    ("p" transpose-paragraphs "paragraphs")
+;    ("t" org-table-transpose-table-at-point "Org mode table")
+    ("q" nil "cancel" :color blue))
 #+end_src
 
 * setup-magit.el
@@ -1089,6 +1246,8 @@ thingss I've resorted to using packages.
 ;(provide 'setup-yasnippet)
 
 #+end_src
+
+* Experiments
 
 * misc
 
