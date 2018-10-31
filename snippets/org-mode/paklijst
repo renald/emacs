@@ -1,0 +1,57 @@
+# -*- mode: snippet -*-
+# name: Paklijst
+# key: !paklijst
+# --
+** Basics [0/8]
+ - [ ] ondergoed
+ - [ ] sokken
+ - [ ] spijkerbroek
+ - [ ] schoenen
+ - [ ] jas
+ - [ ] trui
+ - [ ] shirts
+ - [ ] overhemd
+** Comfort [0/3]
+ - [ ] oordopjes
+ - [ ] ooglapje
+ - [ ] zonnebril
+** Hygiëne [0/6]
+ - [ ] deodorant
+ - [ ] tandenborstel
+ - [ ] tandpasta
+ - [ ] scheerzeep
+ - [ ] scheermesje
+ - [ ] handdoek
+** Medicijnen etc. [0/4]
+ - [ ] paracetamol
+ - [ ] ibuprofen
+ - [ ] deet
+ - [ ] zonnebrandcrème
+** Apparatuur [0/4]
+ - [ ] laptop
+ - [ ] telefoon
+ - [ ] opladers
+ - [ ] reisstekker
+** Reizen [0/2]
+ - [ ] paspoort
+ - [ ] tickets
+** Zomer [0/3]
+ - [ ] korte broek
+ - [ ] slippers
+ - [ ] zwembroek
+** Winter [0/4]
+ - [ ] muts
+ - [ ] handschoenen
+ - [ ] laarzen
+ - [ ] sjaal
+** Sport en vermaak [0/3]
+ - [ ] sportbroek
+ - [ ] sportschoenen
+ - [ ] sportshirt
+** Eten en drinken [0/3]
+ - [ ] kauwgom
+ - [ ] zoutjes
+ - [ ] snoep
+** Overig [0/2]
+ - [ ] sieraden
+ - [ ] horloge
