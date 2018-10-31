@@ -2,7 +2,7 @@
 #+TITLE: Emacs Configuration
 #+AUTHOR: Renald Buter
 #+EMAIL: renald.buter@xs4all.nl
-#+DATE: <2018-10-29 21:44:11 buter>
+#+DATE: <2018-10-30 20:31:56 buter>
 #+OPTIONS: toc:nil num:nil
 #+PROPERTY: header-args :tangle yes
 
@@ -239,7 +239,6 @@ were working on. When you're done, press =C-c <left>=.
 
 #+end_src
 
-#+begin_src emacs-lisp
 ** Hippie Expand
 (setq hippie-expand-try-functions-list
       '(yas-hippie-try-expand
@@ -424,32 +423,31 @@ thingss I've resorted to using packages.
 (setq ns-alternate-modifier 'none) ; allow it to be interpreted by OSX
 (define-key global-map [(alt ?v)] 'scroll-down)
 ;(define-key global-map [(meta ?v)] 'yank)
+#+end_src
 
-
+#+begin_src emacs-lisp
 (setq ;mac-option-modifier 'super
       mac-command-modifier 'meta
       ;ns-function-modifier 'hyper
 )
 
+
+
 ; Move to trans
 (setq delete-by-moving-to-trash t
       trash-directory "~/.Trash/emacs")
 
-; Ignore .DS_Store files with ido mode
-;(add-to-list 'ido-ignore-files "\\.DS_Store")
-
-
 ;(require 'htmlize)
 ;(rk/add-local-lib-to-path "mac-print-mode")
 ;(require 'mac-print-mode)
-
-;(provide 'setup-osx)
-(provide 'setup-ocaml)
-
-
 #+end_src
 
-;(require 'setup-clojure)
+Do not pup up a window when opening files from Workspace, but open a new frame instead.
+
+#+begin_src emacs-lisp
+(setq ns-pop-up-frames nil)
+#+end_src
+
 
 * Appearance
 
