@@ -2,7 +2,7 @@
 #+TITLE: Emacs Configuration
 #+AUTHOR: Renald Buter
 #+EMAIL: renald.buter@xs4all.nl
-#+DATE: <2018-10-30 20:31:56 buter>
+#+DATE: <2018-11-21 21:24:03 RenaldButer>
 #+OPTIONS: toc:nil num:nil
 #+PROPERTY: header-args :tangle yes
 
@@ -139,78 +139,80 @@ Automatically update time stamps, see https://www.emacswiki.org/emacs/TimeStamp.
 ** Other defaults
 
 #+begin_src emacs-lisp
-;; Do not create lockfiles, as they are useless on my laptop
-(setq create-lockfiles nil)
+  ;; Do not create lockfiles, as they are useless on my laptop
+  (setq create-lockfiles nil)
 
-(setq inhibit-startup-screen t)
+  (setq inhibit-startup-screen t)
 
-;; Allow pasting selection outside of Emacs
-;(setq x-select-enable-clipboard t)
-(setq select-enable-clipboard t)
+  ;; Allow pasting selection outside of Emacs
+  ;(setq x-select-enable-clipboard t)
+  (setq select-enable-clipboard t)
 
-;; Move files to trash when deleting
-(setq delete-by-moving-to-trash t)
+  ;; Move files to trash when deleting
+  (setq delete-by-moving-to-trash t)
 
-;; Real emacs knights don't use shift to mark things
-(setq shift-select-mode nil)
+  ;; Real emacs knights don't use shift to mark things
+  (setq shift-select-mode nil)
 
-;; Transparently open compressed files
-(auto-compression-mode t)
+  ;; Transparently open compressed files
+  (auto-compression-mode t)
 
-;; Enable syntax highlighting for older Emacsen that have it off
-(global-font-lock-mode t)
+  ;; Enable syntax highlighting for older Emacsen that have it off
+  (global-font-lock-mode t)
 
-;; Answering just 'y' or 'n' will do
-(defalias 'yes-or-no-p 'y-or-n-p)
+  ;; Answering just 'y' or 'n' will do
+  (defalias 'yes-or-no-p 'y-or-n-p)
 
-;; Don't highlight matches with jump-char - it's distracting
-(setq jump-char-lazy-highlight-face nil)
+  ;; Don't highlight matches with jump-char - it's distracting
+  (setq jump-char-lazy-highlight-face nil)
 
-;; Always display line and column numbers
-(setq line-number-mode t)
-(setq column-number-mode t)
+  ;; Always display line and column numbers
+  (setq line-number-mode t)
+  (setq column-number-mode t)
 
-;; Lines should be N characters wide
-(setq-default fill-column 100)
-(add-hook 'text-mode-hook 'turn-on-auto-fill)
-;; try visual-line-mode for a while...
-;(remove-hook 'text-mode-hook #'turn-on-auto-fill)
-;(add-hook 'text-mode-hook 'turn-on-visual-line-mode)
+  ;; Lines should be N characters wide
+  (setq-default fill-column 100)
+  (add-hook 'text-mode-hook 'turn-on-auto-fill)
+  ;; try visual-line-mode for a while...
+  ;(remove-hook 'text-mode-hook #'turn-on-auto-fill)
+  ;(add-hook 'text-mode-hook 'turn-on-visual-line-mode)
 
-;; Never insert tabs
-(set-default 'indent-tabs-mode nil)
+  ;; Never insert tabs
+  (set-default 'indent-tabs-mode nil)
 
-;; Show me empty lines after buffer end
-(set-default 'indicate-empty-lines t)
+  ;; Show me empty lines after buffer end
+  (set-default 'indicate-empty-lines t)
 
-;; Don't be so stingy on the memory, we have lots now. It's the distant future.
-(setq gc-cons-threshold 20000000)
+  ;; Don't be so stingy on the memory, we have lots now. It's the distant future.
+  (setq gc-cons-threshold 20000000)
 
-;; Sentences do not need double spaces to end. Period.
-(set-default 'sentence-end-double-space nil)
+  ;; Sentences do not need double spaces to end. Period.
+  (set-default 'sentence-end-double-space nil)
 
-;; Better scrolling behaviour
-(setq ;redisplay-dont-pause t
-      scroll-margin 1
-      scroll-step 1
-      scroll-conservatively 10000
-      scroll-preserve-screen-position 1)
+  ;; Better scrolling behaviour
+  (setq ;redisplay-dont-pause t
+        scroll-margin 1
+        scroll-step 1
+        scroll-conservatively 10000
+        scroll-preserve-screen-position 1)
 
-;; Allways show parend
-(show-paren-mode 1)
+  ;; Allways show parend
+  (show-paren-mode 1)
 
-;; Automatically reload files was modified by external program
-(global-auto-revert-mode 1)
+  ;; Automatically reload files was modified by external program
+  (global-auto-revert-mode 1)
 
-;;; RB additions
-;; Add parts of each file's directory to the buffer name if not unique
-(require 'uniquify)
-(setq uniquify-buffer-name-style 'forward)
+  ;;; RB additions
+  ;; Add parts of each file's directory to the buffer name if not unique
+  (require 'uniquify)
+  (setq uniquify-buffer-name-style 'forward)
 
 
-;; Save a list of recent files visited. (open recent file with C-x f)
-(recentf-mode 1)
-(setq recentf-max-saved-items 1000) ;; just 20 is too recent
+  ;; Save a list of recent files visited. (open recent file with C-x f)
+  (recentf-mode 1)
+  (setq 
+   recentf-max-saved-items 1000 ;; just 20 is too recent
+   recentf-save-file     (concat emacs-tmp-dir "/recentf"))
 #+end_src
 
 ** Windows
@@ -448,7 +450,6 @@ Do not pup up a window when opening files from Workspace, but open a new frame i
 (setq ns-pop-up-frames nil)
 #+end_src
 
-
 * Appearance
 
 #+begin_src emacs-lisp
@@ -493,7 +494,7 @@ Do not pup up a window when opening files from Workspace, but open a new frame i
 
 #+end_src
 
-* setup-org.el
+* Org Mode
 
 #+begin_src emacs-lisp
 (rk/add-local-lib-to-path "org-mode/lisp")
@@ -560,15 +561,10 @@ Enable speed keys, as they can be quite effective. Similar in spirit to hydras.
 
 (setq org-capture-templates
       '(
-;        ("t" "Todo"    entry (file+headline "~/org/todo.org" "Tasks")
-;         "* TODO %?\n  %i\n  %a")
-;        ("T" "Work - Backlog" entry (file "~/org/operations/operations.trello")
-;         "* BACKLOG %?\n")
-;        ("!" "Work - Today" entry (file "~/org/operations/operations.trello")
-;         "* TODAY %?\n")
+        ("t" "Todo"    entry (file+headline "~/org/todo.org" "GoDataDriven")
+         "* TODO %?\n :PROPERTIES:\n :CREATED: %u\n :END:")
         ("j" "Journal" entry (file "~/Drives/Dropbox (Personal)/personal/journal.org" )
          "* %^u\n%?\n** Leerpunten\n** Meer doen\n** Dankbaar\n")
-;;        ("n" "Note" entry (file (get-notes-file-today))
         ("n" "Note" entry (file notes-file)
          "* Note entered at %<%H:%M:%S>\n%?\n"
          :empty-lines 1)
