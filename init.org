@@ -2,7 +2,7 @@
 #+TITLE: Emacs Configuration
 #+AUTHOR: Renald Buter
 #+EMAIL: renald.buter@xs4all.nl
-#+DATE: <2018-11-21 21:24:03 RenaldButer>
+#+DATE: <2018-11-23 08:31:19 RenaldButer>
 #+OPTIONS: toc:nil num:nil
 #+PROPERTY: header-args :tangle yes
 
@@ -134,6 +134,43 @@ Automatically update time stamps, see https://www.emacswiki.org/emacs/TimeStamp.
 #+begin_src emacs-lisp
 (add-hook 'before-save-hook 'time-stamp)
 (setq time-stamp-pattern nil)
+#+end_src
+
+** Directories
+
+Put temporary stuff in a =tmp= directory.
+
+#+begin_src emacs-lisp
+(defvar emacs-tmp-dir
+  (expand-file-name "~/tmp/emacs")
+  "base directory where to store files like backups and autosaves ")
+
+; set autosave directory
+; http://snarfed.org/space/gnu%20emacs%20backup%20files
+(defvar autosave-dir (concat emacs-tmp-dir "/autosaves/"))
+(make-directory autosave-dir t)
+
+; backup directory
+(defvar backup-dir (concat emacs-tmp-dir "/backups/"))
+(setq backup-directory-alist (list (cons "." backup-dir)))
+
+; diskspace is cheap!
+(setq delete-old-versions -1)
+(setq version-control t)
+(setq vc-make-backup-files t)
+
+; saveplace: save location in file when saving files
+(setq save-place-file (concat emacs-tmp-dir "/saveplace"))
+(setq-default save-place t)            ;; activate it for all buffers
+(require 'saveplace)                   ;; get the package
+
+; make informative temporary filenames
+(defun make-auto-save-file-name ()
+  (concat autosave-dir
+   (if buffer-file-name
+      (concat "#" (file-name-nondirectory buffer-file-name) "#")
+    (expand-file-name
+     (concat "#%" (buffer-name) "#")))))
 #+end_src
 
 ** Other defaults
@@ -271,6 +308,8 @@ were working on. When you're done, press =C-c <left>=.
 | wo      | without                     |
 | gddr    | GoDataDriven                |
 | gddhttp | http://www.godatadriven.com |
+| gsprm   | gesproken met               |
+|         |                             |
 
 #+BEGIN_SRC emacs-lisp :var data=abbrev 
 (mapc (lambda (x) (define-global-abbrev (car x) (cadr x))) (cddr data))
@@ -279,47 +318,12 @@ were working on. When you're done, press =C-c <left>=.
 #+RESULTS:
 | gddr    | GoDataDriven                |
 | gddhttp | http://www.godatadriven.com |
+| gsprm   | gesproken met               |
+|         |                             |
 
 #+BEGIN_SRC emacs-lisp 
 (add-hook 'text-mode-hook 'abbrev-mode)
 #+END_SRC
-
-** Directories
-
-Put temporary stuff in a =tmp= directory.
-
-#+begin_src emacs-lisp
-(defvar emacs-tmp-dir
-  (concat emacs-root "/tmp")
-  "base directory where to store files like backups and autosaves ")
-
-; set autosave directory
-; http://snarfed.org/space/gnu%20emacs%20backup%20files
-(defvar autosave-dir (concat emacs-tmp-dir "/autosaves/"))
-(make-directory autosave-dir t)
-
-; backup directory
-(defvar backup-dir (concat emacs-tmp-dir "/backups/"))
-(setq backup-directory-alist (list (cons "." backup-dir)))
-
-; diskspace is cheap!
-(setq delete-old-versions -1)
-(setq version-control t)
-(setq vc-make-backup-files t)
-
-; saveplace: save location in file when saving files
-(setq save-place-file (concat emacs-tmp-dir "/saveplace"))
-(setq-default save-place t)            ;; activate it for all buffers
-(require 'saveplace)                   ;; get the package
-
-; make informative temporary filenames
-(defun make-auto-save-file-name ()
-  (concat autosave-dir
-   (if buffer-file-name
-      (concat "#" (file-name-nondirectory buffer-file-name) "#")
-    (expand-file-name
-     (concat "#%" (buffer-name) "#")))))
-#+end_src
 
 ** History
 
@@ -848,7 +852,8 @@ Enable speed keys, as they can be quite effective. Similar in spirit to hydras.
 (setq counsel-find-file-at-point t)
 
  ;; Recommended key bindings
-(global-set-key (kbd "C-s") 'counsel-grep-or-swiper)
+;(global-set-key (kbd "C-s") 'counsel-grep-or-swiper)
+(global-set-key (kbd "C-s") 'swiper)
 (global-set-key (kbd "M-x") 'counsel-M-x)
 (global-set-key (kbd "C-x C-m") 'counsel-M-x)
 (global-set-key (kbd "C-x C-f") 'counsel-find-file)
@@ -1013,10 +1018,10 @@ Transpose for many objects.
 
 ;; -- opam and utop setup --------------------------------
 ;; Setup environment variables using opam
-(dolist
-   (var (car (read-from-string
-              (shell-command-to-string "opam config env --sexp"))))
-  (setenv (car var) (cadr var)))
+;(dolist
+;   (var (car (read-from-string
+;              (shell-command-to-string "opam config env --sexp"))))
+;  (setenv (car var) (cadr var)))
 
 ;; Update the emacs path
 (setq exec-path (split-string (getenv "PATH") path-separator))
