@@ -2,7 +2,7 @@
 #+TITLE: Emacs Configuration
 #+AUTHOR: Renald Buter
 #+EMAIL: renald.buter@xs4all.nl
-#+DATE: <2018-11-23 08:31:19 RenaldButer>
+#+DATE: <2018-11-23 08:35:10 RenaldButer>
 #+OPTIONS: toc:nil num:nil
 #+PROPERTY: header-args :tangle yes
 
@@ -144,6 +144,7 @@ Put temporary stuff in a =tmp= directory.
 (defvar emacs-tmp-dir
   (expand-file-name "~/tmp/emacs")
   "base directory where to store files like backups and autosaves ")
+(make-directory emacs-tmp-dir t)
 
 ; set autosave directory
 ; http://snarfed.org/space/gnu%20emacs%20backup%20files
