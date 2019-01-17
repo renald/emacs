@@ -2,7 +2,7 @@
 #+TITLE: Emacs Configuration
 #+AUTHOR: Renald Buter
 #+EMAIL: renald.buter@xs4all.nl
-#+DATE: <2018-11-23 08:35:10 RenaldButer>
+#+DATE: <2019-01-17 22:25:31 buter>
 #+OPTIONS: toc:nil num:nil
 #+PROPERTY: header-args :tangle yes
 
@@ -247,10 +247,11 @@ Put temporary stuff in a =tmp= directory.
 
 
   ;; Save a list of recent files visited. (open recent file with C-x f)
-  (recentf-mode 1)
   (setq 
    recentf-max-saved-items 1000 ;; just 20 is too recent
    recentf-save-file     (concat emacs-tmp-dir "/recentf"))
+  (recentf-mode 1)
+
 #+end_src
 
 ** Windows
@@ -542,253 +543,269 @@ Enable speed keys, as they can be quite effective. Similar in spirit to hydras.
 
 #+begin_src emacs-lisp
 
-;; Templates
-;;; I want notes organised per day. Thanks
-;;; http://www.howardism.org/Technical/Emacs/journaling-org.html for showing how to do this!
+  ;; Templates
+  ;;; I want notes organised per day. Thanks
+  ;;; http://www.howardism.org/Technical/Emacs/journaling-org.html for showing how to do this!
 
-(setq work-notes-dir
-  (concat (or (getenv "WORKDIR") (concat (getenv "HOME") "/Work/gdd"))
-          "/Notes/"))
+  (setq work-notes-dir
+    (concat (or (getenv "WORKDIR") (concat (getenv "HOME") "/Work/gdd"))
+            "/Notes/"))
 
-;;; DOES NOT WORK ANYMORE 20180103
-;(defun get-notes-file-today ()
-;  "Return filename for today's journal entry."
-;  (let ((daily-name (format-time-string "%Y%m%d.org")))
-;    (expand-file-name (concat work-notes-dir daily-name))))
+  ;;; DOES NOT WORK ANYMORE 20180103
+  ;(defun get-notes-file-today ()
+  ;  "Return filename for today's journal entry."
+  ;  (let ((daily-name (format-time-string "%Y%m%d.org")))
+  ;    (expand-file-name (concat work-notes-dir daily-name))))
 
-(setq notes-file
-;;      (expand-file-name (concat work-notes-dir "notes.org")))
-      "~/Drives/Dropbox (Personal)/org/notes.org")
+  (setq notes-file
+  ;;      (expand-file-name (concat work-notes-dir "notes.org")))
+        "~/Drives/Dropbox (Personal)/org/notes.org")
 
-;; Set to orgmode by default when viewing notes
-;(setq work-notes-rx (concat work-notes-dir ".*/[0-9]*$"))
-(add-to-list 'auto-mode-alist '("Notes.*/[0-9]*$" . org-mode))
+  ;; Set to orgmode by default when viewing notes
+  ;(setq work-notes-rx (concat work-notes-dir ".*/[0-9]*$"))
+  (add-to-list 'auto-mode-alist '("Notes.*/[0-9]*$" . org-mode))
 
-(setq org-capture-templates
-      '(
-        ("t" "Todo"    entry (file+headline "~/org/todo.org" "GoDataDriven")
-         "* TODO %?\n :PROPERTIES:\n :CREATED: %u\n :END:")
-        ("j" "Journal" entry (file "~/Drives/Dropbox (Personal)/personal/journal.org" )
-         "* %^u\n%?\n** Leerpunten\n** Meer doen\n** Dankbaar\n")
-        ("n" "Note" entry (file notes-file)
-         "* Note entered at %<%H:%M:%S>\n%?\n"
-         :empty-lines 1)
-        ("w" "Capture from browser" entry
-         (file+headline "~/org/capture.org" "Notes")
-         "* %:description\nCaptured from %:link\n\n%i"
-         :empty-lines 1)
-        ))
+  (setq org-capture-templates
+        '(
+          ("t" "Todo"    entry (file+headline "~/org/todo.org" "GoDataDriven")
+           "* TODO %?\n :PROPERTIES:\n :CREATED: %u\n :END:")
+          ("j" "Journal" entry (file "~/Drives/Dropbox (Personal)/personal/journal.org" )
+           "* %^u\n%?\n** Leerpunten\n** Meer doen\n** Dankbaar\n")
+          ("n" "Note" entry (file notes-file)
+           "* Note entered at %<%H:%M:%S>\n%?\n"
+           :empty-lines 1)
+          ("w" "Capture from browser" entry
+           (file+headline "~/org/capture.org" "Notes")
+           "* %:description\nCaptured from %:link\n\n%i"
+           :empty-lines 1)
+          ))
 
-(setq org-outline-path-complete-in-steps nil) ; Refile in a single go 
-(setq org-completion-use-ido nil)
-(setq org-refile-use-outline-path t) ; Show full paths for refiling 
-(setq org-refile-allow-creating-parent-nodes (quote confirm)) ; allow refile to create parent tasks with confirmation
-(defun my-org-files-list ()
-  (delq nil
-    (mapcar (lambda (buffer)
-      (buffer-file-name buffer))
-      (org-buffer-list 'files t))))
+  (setq org-outline-path-complete-in-steps nil) ; Refile in a single go 
+  (setq org-completion-use-ido nil)
+  (setq org-refile-use-outline-path t) ; Show full paths for refiling 
+  (setq org-refile-allow-creating-parent-nodes (quote confirm)) ; allow refile to create parent tasks with confirmation
+  (defun my-org-files-list ()
+    (delq nil
+      (mapcar (lambda (buffer)
+        (buffer-file-name buffer))
+        (org-buffer-list 'files t))))
 
-(setq org-refile-targets '((my-org-files-list :maxlevel . 3)))
+  (setq org-refile-targets '((my-org-files-list :maxlevel . 3)))
 
-(setq org-adapt-indentation nil) ;; Avoid indenting the text below a header when promoting/demoting the header
+  (setq org-adapt-indentation nil) ;; Avoid indenting the text below a header when promoting/demoting the header
 
-;(setq org-agenda-skip-scheduled-if-done 't)
-(setq org-log-done nil)
-(setq org-hide-leading-stars t)
-(setq org-log-note-state t)
-(setq org-todo-keywords
-      '((type
-         "TODO(t)"     ; to be done in the near future
-         "STARTED(s!)" ; on going at the moment
-         "WAITING(w)"  ; was started, now waiting for external factor
-         "BLOCKED(b)"  ; was started, but cannot continue until something is fixed
-;         "APPT(a)"     ; appointment
-         "|"
-         "CANCELLED"   ; won't be done
-;         "DEFERRED(e)" ; maybe in the future
-         "DONE(d!/!)"  ; finished!
-         )
-;        (sequence "PROJECT(p)" "|" "FINISHED(f)")
-;        (sequence "INVOICE(i)" "SENT(n)" "|" "RCVD(r)")
-))
+  ;(setq org-agenda-skip-scheduled-if-done 't)
+  (setq org-log-done nil)
+  (setq org-hide-leading-stars t)
+  (setq org-log-note-state t)
+  (setq org-todo-keywords
+        '((type
+           "TODO(t)"     ; to be done in the near future
+           "STARTED(s!)" ; on going at the moment
+           "WAITING(w)"  ; was started, now waiting for external factor
+           "BLOCKED(b)"  ; was started, but cannot continue until something is fixed
+  ;         "APPT(a)"     ; appointment
+           "|"
+           "CANCELLED"   ; won't be done
+  ;         "DEFERRED(e)" ; maybe in the future
+           "DONE(d!/!)"  ; finished!
+           )
+  ;        (sequence "PROJECT(p)" "|" "FINISHED(f)")
+  ;        (sequence "INVOICE(i)" "SENT(n)" "|" "RCVD(r)")
+  ))
 
-(org-babel-do-load-languages
- 'org-babel-load-languages
- '((emacs-lisp . t)
-   (R . t)
-   (ocaml . t)
-   (ruby . t)
-   (shell . t)
-   (sql . t)
-   ))
-;(setq org-todo-keyword-faces
- ;     '( ("BLOCKED(b)" . (:foreground "yellow" :weight bold))))
+  (org-babel-do-load-languages
+   'org-babel-load-languages
+   '((emacs-lisp . t)
+     (R . t)
+     (ocaml . t)
+     (ruby . t)
+     (shell . t)
+     (sql . t)
+     ))
+#+end_src
 
-; gebruik speciaal format, zie http://orgmode.org/org.html#Weekly_002fdaily-agenda
-;(setq org-agenda-include-all-todo nil)
-; I prefer return to activate a link
-(setq org-return-follows-link nil)
+** Agenda
 
-; Do not add a newline after a header
-;(setq org-blank-before-new-entry (quote ((heading . nil) ; was: auto
-;                                         (plain-list-item . auto))))
+#+begin_src elisp
+  ;(setq org-todo-keyword-faces
+   ;     '( ("BLOCKED(b)" . (:foreground "yellow" :weight bold))))
 
-(setq org-default-notes-file 
-      (convert-standard-filename "~/org/todo.org"))
+  ; gebruik speciaal format, zie http://orgmode.org/org.html#Weekly_002fdaily-agenda
+  ;(setq org-agenda-include-all-todo nil)
+  ; I prefer return to activate a link
+  (setq org-return-follows-link nil)
 
-(setq org-agenda-custom-commands
-      '(("l" todo "LATER" nil)
-        ("b" todo "BLOCKED" nil)
-        ("w" todo "THIS-WEEK" nil)
-        ("W" todo "WAITING" nil)
-        ("!" "Scheduled and TODAY items"
-         ((agenda "Normal agenda" ((org-agenda-ndays 1)))
-          (todo "TODAY|WAITING")
-          ;;          (tags "something")
-          )
-         ((org-sorting-strategy '(todo-state-down))
-          (org-agenda-compact-blocks t))
-          )))
-;;             ("W" agenda "" ((org-agenda-ndays 21)))
-;;              ( "A" agenda ""
-;;                ((org-agenda-skip-function
-;;                  (lambda nil
-;;                    (org-agenda-skip-entry-if (quote notregexp) "\\=.*\\[#A\\]")))
-;;                 (org-agenda-ndays 1)
-;;                 (org-agenda-overriding-header "Today's Priority #A tasks: ")))
-;;               ("u" alltodo ""
-;;                ((org-agenda-skip-function
-;;                  (lambda nil
-;;                    (org-agenda-skip-entry-if (quote scheduled) (quote deadline)
-;;                                              (quote regexp) "<[^>\n]+>")))
-;;                (org-agenda-overriding-header "Unscheduled TODO entries: "))))
+  ; Do not add a newline after a header
+  ;(setq org-blank-before-new-entry (quote ((heading . nil) ; was: auto
+  ;                                         (plain-list-item . auto))))
 
-;; org-mode: Don't ruin S-arrow to switch windows please (use M-+ and M-- instead to toggle)
-(setq org-replace-disputed-keys t)
+  (setq org-agenda-files
+        '("~/org/gdd-projects.org"
+          "~/org/todo.org"
+          "~/org/inbox.org"
+          "~/Drives/Dropbox (Personal)/personal/journal.org"))
 
-;; Fontify org-mode code blocks
-(setq org-src-fontify-natively t)
+  (setq org-default-notes-file 
+        (convert-standard-filename "~/org/todo.org"))
 
-;; Export backends
-(require 'ox-beamer)
-(require 'ox-md)
-(require 'ox-html)
-(require 'ox-latex)
+  (setq org-agenda-custom-commands
+        '(("l" todo "LATER" nil)
+          ("b" todo "BLOCKED" nil)
+          ("w" todo "THIS-WEEK" nil)
+          ("W" todo "WAITING" nil)
+          ("g" "Only GDD"
+           ((agenda "Work Today"
+                    ((org-agenda-span 1)))
+            )
+           ((org-agenda-category-filter-preset '("-Prive"))))
+          ("!" "Scheduled and TODAY items"
+           ((agenda "Normal agenda" ((org-agenda-ndays 1)))
+            (todo "TODAY|WAITING")
+            ;;          (tags "something")
+            )
+           ((org-sorting-strategy '(todo-state-down))
+            (org-agenda-compact-blocks t))
+            )))
+  ;;             ("W" agenda "" ((org-agenda-ndays 21)))
+  ;;              ( "A" agenda ""
+  ;;                ((org-agenda-skip-function
+  ;;                  (lambda nil
+  ;;                    (org-agenda-skip-entry-if (quote notregexp) "\\=.*\\[#A\\]")))
+  ;;                 (org-agenda-ndays 1)
+  ;;                 (org-agenda-overriding-header "Today's Priority #A tasks: ")))
+  ;;               ("u" alltodo ""
+  ;;                ((org-agenda-skip-function
+  ;;                  (lambda nil
+  ;;                    (org-agenda-skip-entry-if (quote scheduled) (quote deadline)
+  ;;                                              (quote regexp) "<[^>\n]+>")))
+  ;;                (org-agenda-overriding-header "Unscheduled TODO entries: "))))
 
-;(require 'ox-icalendar)
+  ;; org-mode: Don't ruin S-arrow to switch windows please (use M-+ and M-- instead to toggle)
+  (setq org-replace-disputed-keys t)
 
-;; From contrib. Open something in one of the following applications:
-;; 1. 
-;(require 'org-mac-link)
-;(add-hook 'org-mode-hook
-;          (lambda ()
-;            (define-key org-mode-map (kbd "C-c g") 'org-mac-grab-link)
-;            (define-key org-mode-map (kbd "C-c C-+") 'org-indent-item)
-;            (define-key org-mode-map (kbd "C-c C--") 'org-outdent-item)
-;            (setq abbrev-mode 1)))
+  ;; Fontify org-mode code blocks
+  (setq org-src-fontify-natively t)
 
+  ;; Export backends
+  (require 'ox-beamer)
+  (require 'ox-md)
+  (require 'ox-html)
+  (require 'ox-latex)
 
-; From contrib. Allows you to specify a git file like [[git:/path/to/file::searchstring]]
-;(require 'org-git-link)
-(add-hook 'org-mode-hook
-          (let ((original-command (lookup-key org-mode-map [tab])))
-            `(lambda ()
-               (setq yas-fallback-behavior
-                     '(apply ,original-command))
-               (local-set-key [tab] 'yas-expand))
-               (abbrev-mode t)))
+  ;(require 'ox-icalendar)
 
-;(provide 'setup-org)
-
-;; Monkey-patch org-trello to resolve issue with indenting comments
-
-
-(require 'org-trello)
-
-;(defun orgtrello-entity/compute-first-comment-point! ()
-;  "Compute the card's first comment position.
-;Does preserve position.
-;If no comment is found, return the card's end region."
-;  (save-excursion
-;    (orgtrello-entity/back-to-card!)
-;    (let ((card-region (orgtrello-entity/compute-card-region!)))
-;      (apply 'narrow-to-region card-region)
-;      (let ((next-pt (-if-let (next-pt (search-forward-regexp "[*][*] " nil t)) ;; if not found, return nil and do not move point
-;                         (save-excursion
-;                           (goto-char next-pt)
-;                           (point-at-bol))
-;                       (orgtrello-entity/compute-next-card-point!))))
-;        (widen)
-;        next-pt))))
-
-;; org-trello major mode for all .trello files
-(add-to-list 'auto-mode-alist '("\\.trello$" . org-mode))
-
-; add a hook function to check if this is trello file, then activate the org-trello minor mode.
-(add-hook 'org-mode-hook
-          (lambda ()
-            (let ((filename (buffer-file-name (current-buffer))))
-              (when (and filename (string= "trello" (file-name-extension filename)))
-              (org-trello-mode)))))
-
-;(add-hook 'text-mode-hook 'turn-on-orgstruct++)
+  ;; From contrib. Open something in one of the following applications:
+  ;; 1. 
+  ;(require 'org-mac-link)
+  ;(add-hook 'org-mode-hook
+  ;          (lambda ()
+  ;            (define-key org-mode-map (kbd "C-c g") 'org-mac-grab-link)
+  ;            (define-key org-mode-map (kbd "C-c C-+") 'org-indent-item)
+  ;            (define-key org-mode-map (kbd "C-c C--") 'org-outdent-item)
+  ;            (setq abbrev-mode 1)))
 
 
-(rk/add-local-lib-to-path "ox-hugo")
-(with-eval-after-load 'ox
-  (require 'ox-hugo))
+  ; From contrib. Allows you to specify a git file like [[git:/path/to/file::searchstring]]
+  ;(require 'org-git-link)
+  (add-hook 'org-mode-hook
+            (let ((original-command (lookup-key org-mode-map [tab])))
+              `(lambda ()
+                 (setq yas-fallback-behavior
+                       '(apply ,original-command))
+                 (local-set-key [tab] 'yas-expand))
+                 (abbrev-mode t)))
+
+  ;(provide 'setup-org)
+
+  ;; Monkey-patch org-trello to resolve issue with indenting comments
 
 
-;; Org-Protocol
-;; https://orgmode.org/worg/org-contrib/org-protocol.html
-(require 'org-protocol)
+  (require 'org-trello)
+
+  ;(defun orgtrello-entity/compute-first-comment-point! ()
+  ;  "Compute the card's first comment position.
+  ;Does preserve position.
+  ;If no comment is found, return the card's end region."
+  ;  (save-excursion
+  ;    (orgtrello-entity/back-to-card!)
+  ;    (let ((card-region (orgtrello-entity/compute-card-region!)))
+  ;      (apply 'narrow-to-region card-region)
+  ;      (let ((next-pt (-if-let (next-pt (search-forward-regexp "[*][*] " nil t)) ;; if not found, return nil and do not move point
+  ;                         (save-excursion
+  ;                           (goto-char next-pt)
+  ;                           (point-at-bol))
+  ;                       (orgtrello-entity/compute-next-card-point!))))
+  ;        (widen)
+  ;        next-pt))))
+
+  ;; org-trello major mode for all .trello files
+  (add-to-list 'auto-mode-alist '("\\.trello$" . org-mode))
+
+  ; add a hook function to check if this is trello file, then activate the org-trello minor mode.
+  (add-hook 'org-mode-hook
+            (lambda ()
+              (let ((filename (buffer-file-name (current-buffer))))
+                (when (and filename (string= "trello" (file-name-extension filename)))
+                (org-trello-mode)))))
+
+  ;(add-hook 'text-mode-hook 'turn-on-orgstruct++)
 
 
-;; Org-present
-;; https://github.com/rlister/org-present
-(require 'org-present)
-
-(eval-after-load "org-present"
-  '(progn
-     (add-hook 'org-present-mode-hook
-               (lambda ()
-                 (org-present-big)
-                 (org-display-inline-images)
-                 (org-present-hide-cursor)
-                 (org-present-read-only)))
-     (add-hook 'org-present-mode-quit-hook
-               (lambda ()
-                 (org-present-small)
-                 (org-remove-inline-images)
-                 (org-present-show-cursor)
-                 (org-present-read-write)))))
+  (rk/add-local-lib-to-path "ox-hugo")
+  (with-eval-after-load 'ox
+    (require 'ox-hugo))
 
 
+  ;; Org-Protocol
+  ;; https://orgmode.org/worg/org-contrib/org-protocol.html
+  (require 'org-protocol)
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; Deft
 
-(require 'deft)
-(setq deft-directory "~/Drives/Dropbox (Personal)/Notes/")
-(setq deft-extensions '("org"))
-(setq deft-default-extension "org")
-(setq deft-text-mode 'org-mode)
-(setq deft-use-filename-as-title t)
-(setq deft-use-filter-string-for-filename t)
-(setq deft-auto-save-interval 0)
-;;key to launch deft
-(global-set-key (kbd "C-c d") 'deft)
+  ;; Org-present
+  ;; https://github.com/rlister/org-present
+  (require 'org-present)
 
-(defun rk/deft-strip-spaces (args)
-  "Replace spaces with - in the string contained in the first
-   element of the list args. Used to advise deft's file naming
-   function."
-  (list (replace-regexp-in-string " " "-" (car args))))
+  (eval-after-load "org-present"
+    '(progn
+       (add-hook 'org-present-mode-hook
+                 (lambda ()
+                   (org-present-big)
+                   (org-display-inline-images)
+                   (org-present-hide-cursor)
+                   (org-present-read-only)))
+       (add-hook 'org-present-mode-quit-hook
+                 (lambda ()
+                   (org-present-small)
+                   (org-remove-inline-images)
+                   (org-present-show-cursor)
+                   (org-present-read-write)))))
 
-(advice-add 'deft-new-file-named :filter-args #'rk/deft-strip-spaces)
 
-;(provide 'setup-org)
+
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  ;;; Deft
+
+  (require 'deft)
+  (setq deft-directory "~/Drives/Dropbox (Personal)/Notes/")
+  (setq deft-extensions '("org"))
+  (setq deft-default-extension "org")
+  (setq deft-text-mode 'org-mode)
+  (setq deft-use-filename-as-title t)
+  (setq deft-use-filter-string-for-filename t)
+  (setq deft-auto-save-interval 0)
+  ;;key to launch deft
+  (global-set-key (kbd "C-c d") 'deft)
+
+  (defun rk/deft-strip-spaces (args)
+    "Replace spaces with - in the string contained in the first
+     element of the list args. Used to advise deft's file naming
+     function."
+    (list (replace-regexp-in-string " " "-" (car args))))
+
+  (advice-add 'deft-new-file-named :filter-args #'rk/deft-strip-spaces)
+
+  ;(provide 'setup-org)
 
 #+end_src
 
@@ -1265,9 +1282,6 @@ Transpose for many objects.
  '(excorporate-configuration
    (quote
     ("renaldbuter@godatadriven.com" . "https://outlook.office365.com/EWS/Exchange.asmx")))
- '(org-agenda-files
-   (quote
-    ("~/org/gdd-projects.org" "~/Drives/Dropbox (Personal)/personal/journal.org")))
  '(org-trello-current-prefix-keybinding "C-c o" nil (org-trello))
  '(package-selected-packages
    (quote
