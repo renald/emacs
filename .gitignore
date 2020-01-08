@@ -9,3 +9,12 @@ emacs.d-old
 elpa
 abbrev_defs
 recentf
+ac-comphist.dat
+.org-id-locations
+eshell/
+auto-save-list
+init.elc-backup
+projectile-bookmarks.eld
+projectile.cache
+smex-items
+tramp
