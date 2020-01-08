@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: zsh
+# key: zsh
+# --
+#+begin_src zsh :results value verbatim
+$0
+#+end_src
