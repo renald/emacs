@@ -2,7 +2,7 @@
 #+TITLE: Emacs Configuration
 #+AUTHOR: Renald Buter
 #+EMAIL: renald.buter@xs4all.nl
-#+DATE: <2019-01-27 15:29:25 buter>
+#+DATE: <2020-01-08 22:30:29 buter>
 #+OPTIONS: toc:nil num:nil
 #+PROPERTY: header-args :tangle yes
 
@@ -11,13 +11,14 @@ the literate programming capabilites of org-mode and some peeking at examples su
 configuration]] and [[https://raw.githubusercontent.com/jamiecollinson/dotfiles/master/config.org][this configuration]].
 
 * The basics
+** Globals
 
 I keep all emacs specific things in a particular directory. Note that this is currently completely tied to my OSX
 machine.
 
 #+begin_src emacs-lisp
   (defvar emacs-root
-    (expand-file-name (concat (getenv "HOME") "/Play/Emacs/emacs"))
+    (expand-file-name (concat (getenv "HOME") "/emacs"))
     "Root of the local emacs load path.")
 
   (defvar emacs-local
@@ -183,80 +184,82 @@ Put temporary stuff in a =tmp= directory.
 ** Other defaults
 
 #+begin_src emacs-lisp
-  ;; Do not create lockfiles, as they are useless on my laptop
-  (setq create-lockfiles nil)
+    ;; Do not create lockfiles, as they are useless on my laptop
+    (setq create-lockfiles nil)
 
-  (setq inhibit-startup-screen t)
+    (setq inhibit-startup-screen t)
 
-  ;; Allow pasting selection outside of Emacs
-  ;(setq x-select-enable-clipboard t)
-  (setq select-enable-clipboard t)
+    ;; Allow pasting selection outside of Emacs
+    ;(setq x-select-enable-clipboard t)
+    (setq select-enable-clipboard t)
 
-  ;; Move files to trash when deleting
-  (setq delete-by-moving-to-trash t)
+    ;; Move files to trash when deleting
+    (setq delete-by-moving-to-trash t)
 
-  ;; Real emacs knights don't use shift to mark things
-  (setq shift-select-mode nil)
+    ;; Real emacs knights don't use shift to mark things
+    (setq shift-select-mode nil)
 
-  ;; Transparently open compressed files
-  (auto-compression-mode t)
+    ;; Transparently open compressed files
+    (auto-compression-mode t)
 
-  ;; Enable syntax highlighting for older Emacsen that have it off
-  (global-font-lock-mode t)
+    ;; Enable syntax highlighting for older Emacsen that have it off
+    (global-font-lock-mode t)
 
-  ;; Answering just 'y' or 'n' will do
-  (defalias 'yes-or-no-p 'y-or-n-p)
+    ;; Answering just 'y' or 'n' will do
+    (defalias 'yes-or-no-p 'y-or-n-p)
 
-  ;; Don't highlight matches with jump-char - it's distracting
-  (setq jump-char-lazy-highlight-face nil)
+    ;; Don't highlight matches with jump-char - it's distracting
+    (setq jump-char-lazy-highlight-face nil)
 
-  ;; Always display line and column numbers
-  (setq line-number-mode t)
-  (setq column-number-mode t)
+    ;; Always display line and column numbers
+    (setq line-number-mode t)
+    (setq column-number-mode t)
 
-  ;; Lines should be N characters wide
-  (setq-default fill-column 100)
-  (add-hook 'text-mode-hook 'turn-on-auto-fill)
-  ;; try visual-line-mode for a while...
-  ;(remove-hook 'text-mode-hook #'turn-on-auto-fill)
-  ;(add-hook 'text-mode-hook 'turn-on-visual-line-mode)
+    ;; Lines should be N characters wide
+  ;  (setq-default fill-column 100)
+  ;  (add-hook 'text-mode-hook 'turn-on-auto-fill)
+    ;; try visual-line-mode for a while...
+;(remove-hook 'text-mode-hook #'turn-on-auto-fill)
+    ;(add-hook 'text-mode-hook 'turn-on-visual-line-mode)
 
-  ;; Never insert tabs
-  (set-default 'indent-tabs-mode nil)
+  (global-visual-line-mode 1)
 
-  ;; Show me empty lines after buffer end
-  (set-default 'indicate-empty-lines t)
+    ;; Never insert tabs
+    (set-default 'indent-tabs-mode nil)
 
-  ;; Don't be so stingy on the memory, we have lots now. It's the distant future.
-  (setq gc-cons-threshold 20000000)
+    ;; Show me empty lines after buffer end
+    (set-default 'indicate-empty-lines t)
 
-  ;; Sentences do not need double spaces to end. Period.
-  (set-default 'sentence-end-double-space nil)
+    ;; Don't be so stingy on the memory, we have lots now. It's the distant future.
+    (setq gc-cons-threshold 20000000)
 
-  ;; Better scrolling behaviour
-  (setq ;redisplay-dont-pause t
-        scroll-margin 1
-        scroll-step 1
-        scroll-conservatively 10000
-        scroll-preserve-screen-position 1)
+    ;; Sentences do not need double spaces to end. Period.
+    (set-default 'sentence-end-double-space nil)
 
-  ;; Allways show parend
-  (show-paren-mode 1)
+    ;; Better scrolling behaviour
+    (setq ;redisplay-dont-pause t
+          scroll-margin 1
+          scroll-step 1
+          scroll-conservatively 10000
+          scroll-preserve-screen-position 1)
 
-  ;; Automatically reload files was modified by external program
-  (global-auto-revert-mode 1)
+    ;; Allways show parend
+    (show-paren-mode 1)
 
-  ;;; RB additions
-  ;; Add parts of each file's directory to the buffer name if not unique
-  (require 'uniquify)
-  (setq uniquify-buffer-name-style 'forward)
+    ;; Automatically reload files was modified by external program
+    (global-auto-revert-mode 1)
+
+    ;;; RB additions
+    ;; Add parts of each file's directory to the buffer name if not unique
+    (require 'uniquify)
+    (setq uniquify-buffer-name-style 'forward)
 
 
-  ;; Save a list of recent files visited. (open recent file with C-x f)
-  (setq 
-   recentf-max-saved-items 1000 ;; just 20 is too recent
-   recentf-save-file     (concat emacs-tmp-dir "/recentf"))
-  (recentf-mode 1)
+    ;; Save a list of recent files visited. (open recent file with C-x f)
+    (setq 
+     recentf-max-saved-items 1000 ;; just 20 is too recent
+     recentf-save-file     (concat emacs-tmp-dir "/recentf"))
+    (recentf-mode 1)
 
 #+end_src
 
@@ -399,6 +402,41 @@ Bury the =*scratch*= buffer instead of killing it, makes things stay there durin
     (revert-buffer :ignore-auto :noconfirm))
 #+end_src
 
+
+** Tramp
+
+#+begin_src emacs-lisp
+(require 'tramp)
+(setq tramp-default-method "ssh")
+#+end_src
+
+Check if =~/.ssh/environment= exists and try to parse its content.
+
+#+begin_src emacs-lisp
+  (defun rk/parse-ssh-environment-file ()
+    "Open the ~/.ssh/environment file if it exists and return a association list with keys SSH_AUTH_SOCK and SSH_AGENT_PID"
+    (let ((ssh-env-file (expand-file-name "~/.ssh/environment"))
+          (ssh-values '()))
+      (if (file-exists-p ssh-env-file)
+          (with-temp-buffer
+            (insert-file-contents ssh-env-file) ;; NOTE: Assumes this file exists
+            (while (re-search-forward "^\\(SSH_[^=]+\\)=\\([^;]+\\);" nil t)
+              (push (cons (match-string 1) (match-string 2)) ssh-values)))
+        (error "Could not open %s" ssh-env-file))
+      ssh-values))
+
+  (defun rk/set-ssh-env-values ()
+    (let ((ssh-values (rk/parse-ssh-environment-file)))
+      (if ssh-values
+          (dolist (kv ssh-values)
+            (setenv (car kv) (cdr kv))))
+      ssh-values))
+
+  (rk/set-ssh-env-values)
+
+  ;; TODO: test if an ssh-agent is running on the given SSH_AGENT_PID
+#+end_src
+
 * Packages
 
 For a long time I've resisted using packages, mostly because the packages I needed were not kept up
@@ -422,6 +460,7 @@ thingss I've resorted to using packages.
 (add-to-list 'package-archives '("melpa-stable" . "http://melpa-stable.milkbox.net/packages/") t)
 
 (package-initialize)
+(package-refresh-contents)
 
 (when (not package-archive-contents)
   (package-refresh-contents)
@@ -429,6 +468,18 @@ thingss I've resorted to using packages.
 
 (require 'use-package)
 
+#+end_src
+
+* Safe variables
+
+Trust these variables not to damage me when set using a "-*-" mode-line. See xb
+
+#+begin_src elisp
+(dolist (pair
+	 '((ispell-dictionary       . stringp)
+;;         (variable-name           . type-name)
+	   )) ;; C source code
+  (put (car pair) 'safe-local-variable (cdr pair)))
 #+end_src
 
 * OSX
@@ -448,8 +499,8 @@ thingss I've resorted to using packages.
 
 
 ; Move to trans
-(setq delete-by-moving-to-trash t
-      trash-directory "~/.Trash/emacs")
+(setq delete-by-moving-to-trash 'system-move-file-to-trash)
+;      trash-directory "~/.Trash/emacs")
 
 ;(require 'htmlize)
 ;(rk/add-local-lib-to-path "mac-print-mode")
@@ -462,7 +513,16 @@ Do not pup up a window when opening files from Workspace, but open a new frame i
 (setq ns-pop-up-frames nil)
 #+end_src
 
+
+Use composition mode for Fira Code. See https://github.com/tonsky/FiraCode/wiki/Emacs-instructions.
+
+#+begin_src emacs-lisp
+(mac-auto-operator-composition-mode)
+#+end_src
+
 * Appearance
+
+For Fira, see https://github.com/tonsky/FiraCode/wiki/Emacs-instructions for more instructions.
 
 #+begin_src emacs-lisp
 (Xlaunch
@@ -475,10 +535,13 @@ Do not pup up a window when opening files from Workspace, but open a new frame i
       '( (width . 110) 
          (height . 68) ))
 
+;; Font
 (when window-system
   (set-face-attribute 'default nil
-                      :family "Source Code Pro" :height 120 :weight 'regular))
+                      :family "Fira Code" :height 120 :weight 'regular))
+;;                      :family "Source Code Pro" :height 120 :weight 'regular))
 ;;                      :family "Input Sans Condensed" :height 120 :weight 'regular))
+
 
 ;; Highlight the current line
 (global-hl-line-mode 1)
@@ -507,10 +570,11 @@ Do not pup up a window when opening files from Workspace, but open a new frame i
 #+end_src
 
 * Org Mode
-
+** General
 #+begin_src emacs-lisp
 (rk/add-local-lib-to-path "org-mode/lisp")
 (rk/add-local-lib-to-path "org-mode/contrib/lisp")
+(defconst rk/org-base-dir (expand-file-name "~/org"))
 
 (require 'org)
 
@@ -545,8 +609,7 @@ Enable speed keys, as they can be quite effective. Similar in spirit to hydras.
   (add-to-list 'org-speed-commands-user '("N" org-narrow-to-subtree))
 #+end_src
 
-
-** More
+** Templates
 
 #+begin_src emacs-lisp
 
@@ -577,7 +640,11 @@ Enable speed keys, as they can be quite effective. Similar in spirit to hydras.
           ("t" "Todo"    entry (file+headline "~/org/todo.org" "GoDataDriven")
            "* TODO %?\n :PROPERTIES:\n :CREATED: %u\n :END:")
           ("j" "Journal" entry (file "~/Drives/Dropbox (Personal)/personal/journal.org" )
-           "* %^u\n%?\n** Leerpunten\n** Meer doen\n** Dankbaar\n")
+           "* %^u\n%?\n** Wat kon beter\n** Wat ging goed\n** Dankbaar\n")
+          ("g" "GDD Tech Update" entry (file+datetree "~/org/gdd-tech.org")
+           "* %?\n :PROPERTIES:\n :CREATED: %u\n :END:"
+           :tree-type week
+          )
           ("n" "Note" entry (file notes-file)
            "* Note entered at %<%H:%M:%S>\n%?\n"
            :empty-lines 1)
@@ -633,6 +700,7 @@ Enable speed keys, as they can be quite effective. Similar in spirit to hydras.
 #+end_src
 
 ** Agenda
+
 
 #+begin_src emacs-lisp
   ;(setq org-todo-keyword-faces
@@ -694,126 +762,205 @@ Enable speed keys, as they can be quite effective. Similar in spirit to hydras.
   ;; Fontify org-mode code blocks
   (setq org-src-fontify-natively t)
 
-  ;; Export backends
-  (require 'ox-beamer)
-  (require 'ox-md)
-  (require 'ox-html)
-  (require 'ox-latex)
+  ;; Save files after a state change 
+  ;; https://emacs.stackexchange.com/questions/21754/how-to-automatically-save-all-org-files-after-marking-a-repeating-item-as-done-i
+  (defmacro rk/mu (fnc)
+    "Return function that ignores its arguments and invokes FNC."
+    `(lambda (&rest _rest)
+       (funcall ,fnc)))
+  (advice-add 'org-deadline       :after (rk/mu #'org-save-all-org-buffers))
+  (advice-add 'org-schedule       :after (rk/mu #'org-save-all-org-buffers))
+  (advice-add 'org-store-log-note :after (rk/mu #'org-save-all-org-buffers))
+  (advice-add 'org-todo           :after (rk/mu #'org-save-all-org-buffers))
 
-  ;(require 'ox-icalendar)
+  (require 'org-agenda)
+  (define-key org-agenda-mode-map "S" 'org-agenda-schedule)  ;; was: 'org-agenda-sunrise-sunset
+#+end_src
 
-  ;; From contrib. Open something in one of the following applications:
-  ;; 1. 
-  ;(require 'org-mac-link)
-  ;(add-hook 'org-mode-hook
-  ;          (lambda ()
-  ;            (define-key org-mode-map (kbd "C-c g") 'org-mac-grab-link)
-  ;            (define-key org-mode-map (kbd "C-c C-+") 'org-indent-item)
-  ;            (define-key org-mode-map (kbd "C-c C--") 'org-outdent-item)
-  ;            (setq abbrev-mode 1)))
+#+begin_src emacs-lisp
+    ;; Export backends
+    (require 'ox-beamer)
+    (require 'ox-md)
+    (require 'ox-html)
+    (require 'ox-latex)
 
+    ;(require 'ox-icalendar)
 
-  ; From contrib. Allows you to specify a git file like [[git:/path/to/file::searchstring]]
-  ;(require 'org-git-link)
-  (add-hook 'org-mode-hook
-            (let ((original-command (lookup-key org-mode-map [tab])))
-              `(lambda ()
-                 (setq yas-fallback-behavior
-                       '(apply ,original-command))
-                 (local-set-key [tab] 'yas-expand))
-                 (abbrev-mode t)))
-
-  ;(provide 'setup-org)
-
-  ;; Monkey-patch org-trello to resolve issue with indenting comments
-
-
-;  (require 'org-trello)
-
-  ;(defun orgtrello-entity/compute-first-comment-point! ()
-  ;  "Compute the card's first comment position.
-  ;Does preserve position.
-  ;If no comment is found, return the card's end region."
-  ;  (save-excursion
-  ;    (orgtrello-entity/back-to-card!)
-  ;    (let ((card-region (orgtrello-entity/compute-card-region!)))
-  ;      (apply 'narrow-to-region card-region)
-  ;      (let ((next-pt (-if-let (next-pt (search-forward-regexp "[*][*] " nil t)) ;; if not found, return nil and do not move point
-  ;                         (save-excursion
-  ;                           (goto-char next-pt)
-  ;                           (point-at-bol))
-  ;                       (orgtrello-entity/compute-next-card-point!))))
-  ;        (widen)
-  ;        next-pt))))
-
-  ;; org-trello major mode for all .trello files
-  (add-to-list 'auto-mode-alist '("\\.trello$" . org-mode))
-
-  ; add a hook function to check if this is trello file, then activate the org-trello minor mode.
-  (add-hook 'org-mode-hook
-            (lambda ()
-              (let ((filename (buffer-file-name (current-buffer))))
-                (when (and filename (string= "trello" (file-name-extension filename)))
-                (org-trello-mode)))))
-
-  ;(add-hook 'text-mode-hook 'turn-on-orgstruct++)
+    ;; From contrib. Open something in one of the following applications:
+    ;; 1. 
+    ;(require 'org-mac-link)
+    ;(add-hook 'org-mode-hook
+    ;          (lambda ()
+    ;            (define-key org-mode-map (kbd "C-c g") 'org-mac-grab-link)
+    ;            (define-key org-mode-map (kbd "C-c C-+") 'org-indent-item)
+    ;            (define-key org-mode-map (kbd "C-c C--") 'org-outdent-item)
+    ;            (setq abbrev-mode 1)))
 
 
-  (rk/add-local-lib-to-path "ox-hugo")
-  (with-eval-after-load 'ox
-    (require 'ox-hugo))
+    ; From contrib. Allows you to specify a git file like [[git:/path/to/file::searchstring]]
+    ;(require 'org-git-link)
+    (add-hook 'org-mode-hook
+              (let ((original-command (lookup-key org-mode-map [tab])))
+                `(lambda ()
+                   (setq yas-fallback-behavior
+                         '(apply ,original-command))
+                   (local-set-key [tab] 'yas-expand))
+                   (abbrev-mode t)))
+
+    ;(provide 'setup-org)
+
+    ;; Monkey-patch org-trello to resolve issue with indenting comments
 
 
-  ;; Org-Protocol
-  ;; https://orgmode.org/worg/org-contrib/org-protocol.html
-  (require 'org-protocol)
+  ;  (require 'org-trello)
+
+    ;(defun orgtrello-entity/compute-first-comment-point! ()
+    ;  "Compute the card's first comment position.
+    ;Does preserve position.
+    ;If no comment is found, return the card's end region."
+    ;  (save-excursion
+    ;    (orgtrello-entity/back-to-card!)
+    ;    (let ((card-region (orgtrello-entity/compute-card-region!)))
+    ;      (apply 'narrow-to-region card-region)
+    ;      (let ((next-pt (-if-let (next-pt (search-forward-regexp "[*][*] " nil t)) ;; if not found, return nil and do not move point
+    ;                         (save-excursion
+    ;                           (goto-char next-pt)
+    ;                           (point-at-bol))
+    ;                       (orgtrello-entity/compute-next-card-point!))))
+    ;        (widen)
+    ;        next-pt))))
+
+    ;; org-trello major mode for all .trello files
+    (add-to-list 'auto-mode-alist '("\\.trello$" . org-mode))
+
+    ; add a hook function to check if this is trello file, then activate the org-trello minor mode.
+    (add-hook 'org-mode-hook
+              (lambda ()
+                (let ((filename (buffer-file-name (current-buffer))))
+                  (when (and filename (string= "trello" (file-name-extension filename)))
+                  (org-trello-mode)))))
+
+    ;(add-hook 'text-mode-hook 'turn-on-orgstruct++)
 
 
-  ;; Org-present
-  ;; https://github.com/rlister/org-present
-  (require 'org-present)
-
-  (eval-after-load "org-present"
-    '(progn
-       (add-hook 'org-present-mode-hook
-                 (lambda ()
-                   (org-present-big)
-                   (org-display-inline-images)
-                   (org-present-hide-cursor)
-                   (org-present-read-only)))
-       (add-hook 'org-present-mode-quit-hook
-                 (lambda ()
-                   (org-present-small)
-                   (org-remove-inline-images)
-                   (org-present-show-cursor)
-                   (org-present-read-write)))))
+    (rk/add-local-lib-to-path "ox-hugo")
+    (with-eval-after-load 'ox
+      (require 'ox-hugo))
 
 
+    ;; Org-Protocol
+    ;; https://orgmode.org/worg/org-contrib/org-protocol.html
+    (require 'org-protocol)
 
-  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-  ;;; Deft
 
-  (require 'deft)
-  (setq deft-directory "~/Drives/Dropbox (Personal)/Notes/")
-  (setq deft-extensions '("org"))
-  (setq deft-default-extension "org")
-  (setq deft-text-mode 'org-mode)
-  (setq deft-use-filename-as-title t)
-  (setq deft-use-filter-string-for-filename t)
-  (setq deft-auto-save-interval 0)
-  ;;key to launch deft
-  (global-set-key (kbd "C-c d") 'deft)
+    ;; Org-present
+    ;; https://github.com/rlister/org-present
+    (require 'org-present)
 
-  (defun rk/deft-strip-spaces (args)
-    "Replace spaces with - in the string contained in the first
-     element of the list args. Used to advise deft's file naming
-     function."
-    (list (replace-regexp-in-string " " "-" (car args))))
+    (eval-after-load "org-present"
+      '(progn
+         (add-hook 'org-present-mode-hook
+                   (lambda ()
+                     (org-present-big)
+                     (org-display-inline-images)
+                     (org-present-hide-cursor)
+                     (org-present-read-only)))
+         (add-hook 'org-present-mode-quit-hook
+                   (lambda ()
+                     (org-present-small)
+                     (org-remove-inline-images)
+                     (org-present-show-cursor)
+                     (org-present-read-write)))))
 
-  (advice-add 'deft-new-file-named :filter-args #'rk/deft-strip-spaces)
 
-  ;(provide 'setup-org)
 
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    ;;; Deft
+
+    (require 'deft)
+    (setq deft-directory "~/Drives/Dropbox (Personal)/Notes/")
+    (setq deft-extensions '("org"))
+    (setq deft-default-extension "org")
+    (setq deft-text-mode 'org-mode)
+    (setq deft-use-filename-as-title t)
+    (setq deft-use-filter-string-for-filename t)
+    (setq deft-auto-save-interval 0)  ;;key to launch deft
+    (global-set-key (kbd "C-c d") 'deft)
+
+    (defun rk/deft-strip-spaces (args)
+      "Replace spaces with - in the string contained in the first
+       element of the list args. Used to advise deft's file naming
+       function."
+      (list (replace-regexp-in-string " " "-" (car args))))
+
+    (advice-add 'deft-new-file-named :filter-args #'rk/deft-strip-spaces)
+
+    ;(provide 'setup-org)
+
+#+end_src
+
+** OKR updates
+
+#+begin_src emacs-lisp
+  ;; See https://emacs.stackexchange.com/questions/17853/goto-last-line-in-org-table
+  (defun rk/org-table-find-table (&optional backward)
+    "Find the nearest table. A table is identified by looking for
+     the regular expression `^| *[^|]* |`. If called with a prefix
+     argument, search backward. If the search fails, returns nil."
+    (interactive "P")
+    (let ((search (if backward 're-search-backward 're-search-forward)))
+      (if (funcall search org-table-line-regexp nil t)
+          (goto-char (org-table-begin))
+        (message "No table found."))))
+
+  (defun rk/org-table-goto-last-row ()
+    (interactive)
+    (goto-char (org-table-end))
+    (backward-char)
+    (org-table-goto-column 1))
+
+  (defun rk/org-time-stamp-inactive-noprompt ()
+    (org-insert-time-stamp nil nil t))
+
+  (defun rk/insert-okr-table ()
+    "Insert a pristine new OKR table header"
+    (interactive)
+    (insert "| Week | # |\n")
+    (insert "|------|---|\n"))
+
+  (defun rk/new-okr-table ()
+    "Create a pristine new OKR table and update the first week"
+    (interactive)
+    (rk/insert-okr-table)
+    (forward-line -2)
+    (rk/update-okr-table))
+
+  (defun rk/update-okr-table ()
+    "Find the next table in the buffer, assume it's an OKR table.
+     Then append a row to the OKR table the pointer is currently on"
+    (interactive)
+    (rk/org-table-find-table)
+    (rk/org-table-goto-last-row)
+    (org-table-insert-row 'below)
+    (rk/org-time-stamp-inactive-noprompt)
+    (org-table-goto-column 2)
+    (insert (read-string "Value to add for this week: "))
+    (org-table-align)
+    (forward-line))
+
+
+  (defmacro rk/create-open-file-shortcut (key file)
+    "Set a shortcut <C-c o <key>> to open <file>. 
+  EXAMPLE: rk/create-open-shortcut \"C\" \"~/org/gdd-customers.org\""
+    `(global-set-key (kbd (concat "C-c o " ,key))
+                  (lambda ()
+                    (interactive)
+                    (find-file ,file))))
+
+
+  (rk/create-open-file-shortcut "O" (concat rk/org-base-dir "/okrs.org"))
+  (rk/create-open-file-shortcut "C" (concat rk/org-base-dir "/gdd-customers.org"))
+  (rk/create-open-file-shortcut "T" (concat rk/org-base-dir "/todo.org"))
 #+end_src
 
 * Setup SmartParens
@@ -823,7 +970,7 @@ Enable speed keys, as they can be quite effective. Similar in spirit to hydras.
 (add-hook 'org-mode-hook #'smartparens-mode)
 #+end_src
 
-* setup-keyboard.el
+* Global shortcuts and keyboard remaps
 
 #+begin_src emacs-lisp
 (global-set-key (kbd "M-/") 'hippie-expand)
@@ -856,7 +1003,9 @@ Enable speed keys, as they can be quite effective. Similar in spirit to hydras.
 (global-set-key "\C-\M-q" 'rk/unfill-paragraph)
 (global-set-key "\M-q" 'rk/fill-or-unfill-paragraph)
 
-;(provide 'setup-keyboard)
+
+(global-set-key (kbd "C-M-2") 'mark-sexp) ;; C-M-@ does not work on OSX
+(global-set-key (kbd "<F4>") 'recompile)
 
 #+end_src
 
@@ -870,7 +1019,11 @@ Enable speed keys, as they can be quite effective. Similar in spirit to hydras.
 (require 'hydra)
 
 (ivy-mode 1)
+#+end_src
 
+The following is simply copied from the [[https://oremacs.com/swiper/#introduction][Ivy User Manual]].
+
+#+begin_src emacs-lisp
 (setq ivy-use-virtual-buffers t)
 (setq ivy-count-format "[%d/%d] ")
 
@@ -882,7 +1035,7 @@ Enable speed keys, as they can be quite effective. Similar in spirit to hydras.
 (global-set-key (kbd "M-x") 'counsel-M-x)
 (global-set-key (kbd "C-x C-m") 'counsel-M-x)
 (global-set-key (kbd "C-x C-f") 'counsel-find-file)
-(global-set-key (kbd "C-x C-r") 'ivy-recentf)
+(global-set-key (kbd "C-x C-r") 'counsel-recentf)
 (global-set-key (kbd "C-c C-r") 'ivy-resume)
 (global-set-key (kbd "<f6>") 'ivy-resume)
 (global-set-key (kbd "C-h f") 'counsel-describe-function)
@@ -898,7 +1051,33 @@ Enable speed keys, as they can be quite effective. Similar in spirit to hydras.
 (define-key ivy-minibuffer-map (kbd "<return>") 'ivy-alt-done) ;; instead of ivy-done
 (define-key ivy-minibuffer-map (kbd "M-<return>") 'ivy-done)
 ;(define-key read-expression-map (kbd "C-r") 'counsel-expression-history)
+#+end_src
 
+Ignore dotfiles.
+
+#+begin_src emacs-lisp
+  (setq counsel-find-file-ignore-regexp
+          (concat
+           ;; File names beginning with # or .
+           "\\(?:\\`[#.]\\)"
+           ;; File names ending with # or ~
+           "\\|\\(?:\\`.+?[#~]\\'\\)"))
+#+end_src
+
+
+Try a different builder for reading files. The `t` entry is the default one.
+
+#+begin_src emacs-lisp
+  (setq ivy-re-builders-alist
+        '((read-file-name-internal . ivy--regex-fuzzy)
+          (t . ivy--regex-plus)) ; default
+  )
+
+#+end_src
+
+Some additional ivy integrations: magit and flyspell.
+
+#+begin_src emacs-lisp
 (setq magit-completing-read-function 'ivy-completing-read)
 
 (require 'flyspell-correct-ivy)
@@ -1005,7 +1184,7 @@ Transpose for many objects.
 
 #+end_src
 
-* setup-markdown.el
+* Markdown
 
 #+begin_src emacs-lisp
 (rk/add-local-lib-to-path "markdown-mode")
@@ -1019,7 +1198,9 @@ Transpose for many objects.
    "Major mode for editing GitHub Flavored Markdown files" t)
 (add-to-list 'auto-mode-alist '("README\\.md\\'" . gfm-mode))
 
-;(provide 'setup-markdown)
+
+(add-hook 'markdown-mode-hook #'smartparens-mode)
+(add-hook 'markdown-mode-hook #'flyspell-mode)
 
 #+end_src
 
@@ -1049,19 +1230,19 @@ Transpose for many objects.
 ;  (setenv (car var) (cadr var)))
 
 ;; Update the emacs path
-(setq exec-path (split-string (getenv "PATH") path-separator))
+;(setq exec-path (split-string (getenv "PATH") path-separator))
 ;; Update the emacs load path
-(push (concat (getenv "OCAML_TOPLEVEL_PATH")
-              "/../../share/emacs/site-lisp") load-path)
+;(push (concat (getenv "OCAML_TOPLEVEL_PATH")
+;              "/../../share/emacs/site-lisp") load-path)
 
 ;; Automatically load utop.el
-(autoload 'utop "utop" "Toplevel for OCaml" t)
-(autoload 'utop-minor-mode "utop" "Minor mode for utop" t)
+;(autoload 'utop "utop" "Toplevel for OCaml" t)
+;(autoload 'utop-minor-mode "utop" "Minor mode for utop" t)
 ;(add-hook 'tuareg-mode-hook 'utop-minor-mode)
 
 ;;; Add Merlin as well
-(setq opam-share (substring (shell-command-to-string "opam config var share") 0 -1))
-(add-to-list 'load-path (concat opam-share "/emacs/site-lisp"))
+;(setq opam-share (substring (shell-command-to-string "opam config var share") 0 -1))
+;(add-to-list 'load-path (concat opam-share "/emacs/site-lisp"))
 (require 'merlin)
 
 ;; Enable Merlin for ML buffers
@@ -1154,20 +1335,21 @@ Transpose for many objects.
 
 #+end_src
 
-* setup-ruby.el
+* Ruby
 
 #+begin_src emacs-lisp
-;(defun rk/set-compile-command-ruby
-;    (set (make-local-variable 'compile-command)
-;     (format "ruby -c %s" (file-name-nondirectory buffer-file-name))))
+  ;(defun rk/set-compile-command-ruby
+  ;    (set (make-local-variable 'compile-command)
+  ;     (format "ruby -c %s" (file-name-nondirectory buffer-file-name))))
 
-;(add-hook 'ruby-mode-hook 'rk/set-compile-command-ruby)
+  ;(add-hook 'ruby-mode-hook 'rk/set-compile-command-ruby)
 
-(add-hook 'ruby-mode-hook (lambda ()
-                            (auto-fill-mode 1)
-                            (linum-mode 1)))
+  (add-hook 'ruby-mode-hook (lambda ()
+                              (auto-fill-mode 1)
+                              (linum-mode 1)
+                              (smartparens-mode 1)))
 
-;(provide 'setup-ruby)
+  ;(provide 'setup-ruby)
 
 #+end_src
 
@@ -1200,26 +1382,45 @@ Transpose for many objects.
 
 #+end_src
 
-* setup-spelling.el
+* Spelling
+
 
 #+begin_src emacs-lisp
-(setq ispell-program-name "/usr/local/bin/aspell")
-(setq ispell-list-command "--list")
+  (setenv
+   "DICPATH"
+   (concat (getenv "HOME") "/Library/Spelling"))
+;  (setenv "LANG" "en_GB,nl_NL")
+  (setenv "LANG" "en_GB")
 
-(require 'ispell)
-(require 'flyspell)
+  ;;(setq ispell-program-name "/usr/local/bin/aspell")
+  (setq ispell-program-name (executable-find "hunspell"))
+  (with-eval-after-load "ispell"
+    (setq ispell-really-hunspell t)
+;    (setq ispell-program-name "hunspell")
+;    (setq ispell-dictionary "en_GB,nl_NL")
+;    (ispell-set-spellchecker-params)
+;    (ispell-hunspell-add-multi-dic "en_GB,nl_NL"))
+)
+  ;; Howebrew does not provide dictionaries for hunspell, so we need to download them to e.g. ~/Library/Spelling
+  ;; Get them from https://wiki.openoffice.org/wiki/Dictionaries 
+  ;; You need the .dic and the .aff files
+  ;; e.g. wget -O ~/Library/Spelling/nl_NL.aff https://cgit.freedesktop.org/libreoffice/dictionaries/tree/nl_NL/nl_NL.aff
+  ;;      wget -O ~/Library/Spelling/en_GB.aff https://cgit.freedesktop.org/libreoffice/dictionaries/plain/en/en_GB.aff
 
-(global-set-key (kbd "<f1>") 'ispell-word)
-(global-set-key (kbd "C-<f1>") 'flyspell-mode)
+  (require 'ispell)
+  (require 'flyspell)
 
-;; https://d12frosted.io/posts/2016-05-09-flyspell-correct-intro.html
-(require 'flyspell-correct)
-(require 'flyspell-correct-ivy)
-(setq flyspell-correct-interface 'flyspell-correct-ivy)
-(define-key flyspell-mode-map (kbd "C-;") 'flyspell-correct-previous-word-generic)
+  (global-set-key (kbd "<f1>") 'ispell-word)
+  (global-set-key (kbd "C-<f1>") 'flyspell-mode)
 
-;(provide 'setup-spelling)
+  ;; https://d12frosted.io/posts/2016-05-09-flyspell-correct-intro.html
+  (require 'flyspell-correct)
+  (require 'flyspell-correct-ivy)
+  (setq flyspell-correct-interface 'flyspell-correct-ivy)
+  (define-key flyspell-mode-map (kbd "C-;") 'flyspell-correct-previous-word-generic)
 
+  (add-hook 'org-mode-hook 'turn-on-flyspell)
+  (setq flyspell-issue-welcome-flag nil) ;; fix flyspell problem
 #+end_src
 
 * setup-yaml.el
@@ -1273,9 +1474,95 @@ Transpose for many objects.
 
 #+end_src
 
+* Projectile
+
+** Install and configure via use-package
+
+#+begin_src emacs-lisp
+(use-package projectile
+  :ensure t
+  :config
+;  (define-key projectile-mode-map (kbd "s-p") 'projectile-command-map) ; no Super on my OSX please
+  (define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map)
+  (projectile-mode t))
+#+end_src
+
+** Enable it for my org files
+
+#+begin_src emacs-lisp
+(setq projectile-project-search-path '("~/org/" "~/Coding/"))
+#+end_src
+
+* Rust
+** Get rust package
+
+#+begin_src emacs-lisp
+  (use-package rust-mode
+    :ensure t
+    :init
+    (add-to-list 'auto-mode-alist '("\\.rs\\'" . rust-mode))
+    (add-hook 'rust-mode-hook
+              (lambda ()
+                (turn-on-smartparens-mode)
+                (set (make-local-variable 'compile-command)
+                     (let ((file (file-name-nondirectory buffer-file-name)))
+                       (format "rustc %s" file))))))
+
+#+end_src
+
+Make sure that the executables (installed with `rustup`) are in `PATH`.
+
+#+begin_src emacs-lisp
+  (setenv "PATH" (concat (getenv "PATH") (expand-file-name ":~/.cargo/bin")))
+  (add-to-list 'exec-path  (expand-file-name "~/.cargo/bin"))
+#+end_src
+
+** Add cargo to the path
+
+I can't seem to get cargo installed via package-install (not found, although I've tried several
+package-refreshes). So instead, I'll just clone the repository.
+
+#+begin_src emacs-lisp
+  (rk/add-local-lib-to-path "cargo.el")
+  (require 'cargo)
+  
+  (add-hook 'rust-mode-hook 'cargo-minor-mode)
+#+end_src
+
+* Clojure
+
+#+begin_src emacs-lisp
+  (add-hook 'clojure-mode-hook
+            (lambda ()
+              (turn-on-smartparens-mode)))
+#+end_src
 * Experiments
 
+** See https://stackoverflow.com/questions/25188206/how-do-you-write-an-emacs-lisp-function-to-replace-a-word-at-point
+
+#+begin_src emacs-lisp
+  (defun rk/unhex ()
+  "Apply url-unhex-string to the region or the symbol at point"
+    (interactive)
+    (let* ((bounds (if (use-region-p)
+                      (cons (region-beginning) (region-end))
+                     (bounds-of-thing-at-point 'symbol)))
+           (text (buffer-substring-no-properties (car bounds) (cdr bounds)))
+           (unhexed (url-unhex-string text)))
+      (when bounds
+        (delete-region (car bounds) (cdr bounds))
+        (insert unhexed))))
+#+end_src
+
+
+** TexLive path
+#+begin_src emacs-lisp
+(setenv "PATH" (concat (getenv "PATH") ":/Library/Tex/texbin"))
+#+end_src
+
 * misc
+
+** Automatically added stuff
 
 #+begin_src emacs-lisp
 
@@ -1306,3 +1593,6 @@ Transpose for many objects.
 
 
 #+end_src
+
+
+
