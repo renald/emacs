@@ -2,7 +2,7 @@
 #+TITLE: Emacs Configuration
 #+AUTHOR: Renald Buter
 #+EMAIL: renald.buter@xs4all.nl
-#+DATE: <2020-01-08 22:30:29 buter>
+#+DATE: <2020-06-25 11:30:55 buter>
 #+OPTIONS: toc:nil num:nil
 #+PROPERTY: header-args :tangle yes
 
@@ -33,10 +33,12 @@ machine.
     "A utility to add directory `name` in `emacs-local` to the load-path"
     (add-to-list 'load-path (expand-file-name (concat emacs-local "/" name))))
 
-(rk/add-local-lib-to-path "org-mode/lisp")
-(rk/add-local-lib-to-path "org-mode/contrib/lisp")
+  (rk/add-local-lib-to-path "org-mode/lisp")
+  (rk/add-local-lib-to-path "org-mode/contrib/lisp")
 
-(require 'org)
+  (defvar rk/notes-dir (expand-file-name "~/Drives/Dropbox (Personal)/Notes/"))
+
+  (require 'org)
 
   (defvar rk/configuration-org
     (expand-file-name (concat emacs-root "/init.org"))
@@ -216,7 +218,7 @@ Put temporary stuff in a =tmp= directory.
     (setq column-number-mode t)
 
     ;; Lines should be N characters wide
-  ;  (setq-default fill-column 100)
+  (setq-default fill-column 100)
   ;  (add-hook 'text-mode-hook 'turn-on-auto-fill)
     ;; try visual-line-mode for a while...
 ;(remove-hook 'text-mode-hook #'turn-on-auto-fill)
@@ -410,7 +412,7 @@ Bury the =*scratch*= buffer instead of killing it, makes things stay there durin
 (setq tramp-default-method "ssh")
 #+end_src
 
-Check if =~/.ssh/environment= exists and try to parse its content.
+Check if =~/.ssh/environment= exists and try to parse its content. If =ssh-agent= was run before Emacs was started, this will allow tramp to use ssh-keys to access. If you run =ssh-agent= later, then re-run =rk/set-ssh-env-values= to reinitialize.
 
 #+begin_src emacs-lisp
   (defun rk/parse-ssh-environment-file ()
@@ -426,6 +428,7 @@ Check if =~/.ssh/environment= exists and try to parse its content.
       ssh-values))
 
   (defun rk/set-ssh-env-values ()
+    (interactive) ;; so we can also use it with M-x
     (let ((ssh-values (rk/parse-ssh-environment-file)))
       (if ssh-values
           (dolist (kv ssh-values)
@@ -468,6 +471,23 @@ thingss I've resorted to using packages.
 
 (require 'use-package)
 
+#+end_src
+
+** Straight
+
+#+begin_src emacs-lisp
+(defvar bootstrap-version)
+(let ((bootstrap-file
+       (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
+      (bootstrap-version 5))
+  (unless (file-exists-p bootstrap-file)
+    (with-current-buffer
+        (url-retrieve-synchronously
+         "https://raw.githubusercontent.com/raxod502/straight.el/develop/install.el"
+         'silent 'inhibit-cookies)
+      (goto-char (point-max))
+      (eval-print-last-sexp)))
+  (load bootstrap-file nil 'nomessage))
 #+end_src
 
 * Safe variables
@@ -552,6 +572,13 @@ For Fira, see https://github.com/tonsky/FiraCode/wiki/Emacs-instructions for mor
 (load-theme 'zenburn t)
 
 
+#+end_src
+
+** Modeline
+
+
+
+#+begin_src emacs-lisp
 (setq-default mode-line-format
       (list
        ;; value of current buffer name
@@ -567,6 +594,12 @@ For Fira, see https://github.com/tonsky/FiraCode/wiki/Emacs-instructions for mor
        
 ;(provide 'setup-appearance)
 
+#+end_src
+
+* Setup SmartParens
+
+#+begin_src emacs-lisp
+(require 'smartparens-config)
 #+end_src
 
 * Org Mode
@@ -597,6 +630,12 @@ For Fira, see https://github.com/tonsky/FiraCode/wiki/Emacs-instructions for mor
 (global-set-key "\C-ca" 'org-agenda)
 (global-set-key "\C-cb" 'org-iswitchb)
 (global-set-key "\C-cr" 'org-capture)
+#+end_src
+
+Turn on smartparens-mode
+
+#+begin_src emacs-lisp
+(add-hook 'org-mode-hook #'smartparens-mode)
 #+end_src
 
 ** Speed commands
@@ -654,6 +693,11 @@ Enable speed keys, as they can be quite effective. Similar in spirit to hydras.
            :empty-lines 1)
           ))
 
+#+end_src
+
+** General settings
+
+#+begin_src emacs-lisp
   (setq org-outline-path-complete-in-steps nil) ; Refile in a single go 
   (setq org-completion-use-ido nil)
   (setq org-refile-use-outline-path t) ; Show full paths for refiling 
@@ -669,9 +713,9 @@ Enable speed keys, as they can be quite effective. Similar in spirit to hydras.
   (setq org-adapt-indentation nil) ;; Avoid indenting the text below a header when promoting/demoting the header
 
   ;(setq org-agenda-skip-scheduled-if-done 't)
-  (setq org-log-done nil)
-  (setq org-hide-leading-stars t)
-  (setq org-log-note-state t)
+  (setq org-hide-leading-stars nil) ; show leading stars
+  (setq org-log-done nil) ; do not keep a schedule
+  (setq org-log-note-state nil) ; do not keep a schedule
   (setq org-todo-keywords
         '((type
            "TODO(t)"     ; to be done in the near future
@@ -719,6 +763,7 @@ Enable speed keys, as they can be quite effective. Similar in spirit to hydras.
         '("~/org/gdd-projects.org"
           "~/org/todo.org"
           "~/org/inbox.org"
+          "~/org/projects.org"
           "~/Drives/Dropbox (Personal)/personal/journal.org"))
 
   (setq org-default-notes-file 
@@ -784,63 +829,63 @@ Enable speed keys, as they can be quite effective. Similar in spirit to hydras.
     (require 'ox-html)
     (require 'ox-latex)
 
-    ;(require 'ox-icalendar)
+                                            ;(require 'ox-icalendar)
 
     ;; From contrib. Open something in one of the following applications:
     ;; 1. 
-    ;(require 'org-mac-link)
-    ;(add-hook 'org-mode-hook
-    ;          (lambda ()
-    ;            (define-key org-mode-map (kbd "C-c g") 'org-mac-grab-link)
-    ;            (define-key org-mode-map (kbd "C-c C-+") 'org-indent-item)
-    ;            (define-key org-mode-map (kbd "C-c C--") 'org-outdent-item)
-    ;            (setq abbrev-mode 1)))
+                                            ;(require 'org-mac-link)
+                                            ;(add-hook 'org-mode-hook
+                                            ;          (lambda ()
+                                            ;            (define-key org-mode-map (kbd "C-c g") 'org-mac-grab-link)
+                                            ;            (define-key org-mode-map (kbd "C-c C-+") 'org-indent-item)
+                                            ;            (define-key org-mode-map (kbd "C-c C--") 'org-outdent-item)
+                                            ;            (setq abbrev-mode 1)))
 
 
-    ; From contrib. Allows you to specify a git file like [[git:/path/to/file::searchstring]]
-    ;(require 'org-git-link)
+                                            ; From contrib. Allows you to specify a git file like [[git:/path/to/file::searchstring]]
+                                            ;(require 'org-git-link)
     (add-hook 'org-mode-hook
               (let ((original-command (lookup-key org-mode-map [tab])))
                 `(lambda ()
                    (setq yas-fallback-behavior
                          '(apply ,original-command))
                    (local-set-key [tab] 'yas-expand))
-                   (abbrev-mode t)))
+                (abbrev-mode t)))
 
-    ;(provide 'setup-org)
+                                            ;(provide 'setup-org)
 
     ;; Monkey-patch org-trello to resolve issue with indenting comments
 
 
-  ;  (require 'org-trello)
+                                            ;  (require 'org-trello)
 
-    ;(defun orgtrello-entity/compute-first-comment-point! ()
-    ;  "Compute the card's first comment position.
-    ;Does preserve position.
-    ;If no comment is found, return the card's end region."
-    ;  (save-excursion
-    ;    (orgtrello-entity/back-to-card!)
-    ;    (let ((card-region (orgtrello-entity/compute-card-region!)))
-    ;      (apply 'narrow-to-region card-region)
-    ;      (let ((next-pt (-if-let (next-pt (search-forward-regexp "[*][*] " nil t)) ;; if not found, return nil and do not move point
-    ;                         (save-excursion
-    ;                           (goto-char next-pt)
-    ;                           (point-at-bol))
-    ;                       (orgtrello-entity/compute-next-card-point!))))
-    ;        (widen)
-    ;        next-pt))))
+                                            ;(defun orgtrello-entity/compute-first-comment-point! ()
+                                            ;  "Compute the card's first comment position.
+                                            ;Does preserve position.
+                                            ;If no comment is found, return the card's end region."
+                                            ;  (save-excursion
+                                            ;    (orgtrello-entity/back-to-card!)
+                                            ;    (let ((card-region (orgtrello-entity/compute-card-region!)))
+                                            ;      (apply 'narrow-to-region card-region)
+                                            ;      (let ((next-pt (-if-let (next-pt (search-forward-regexp "[*][*] " nil t)) ;; if not found, return nil and do not move point
+                                            ;                         (save-excursion
+                                            ;                           (goto-char next-pt)
+                                            ;                           (point-at-bol))
+                                            ;                       (orgtrello-entity/compute-next-card-point!))))
+                                            ;        (widen)
+                                            ;        next-pt))))
 
     ;; org-trello major mode for all .trello files
     (add-to-list 'auto-mode-alist '("\\.trello$" . org-mode))
 
-    ; add a hook function to check if this is trello file, then activate the org-trello minor mode.
+                                            ; add a hook function to check if this is trello file, then activate the org-trello minor mode.
     (add-hook 'org-mode-hook
               (lambda ()
                 (let ((filename (buffer-file-name (current-buffer))))
                   (when (and filename (string= "trello" (file-name-extension filename)))
-                  (org-trello-mode)))))
+                    (org-trello-mode)))))
 
-    ;(add-hook 'text-mode-hook 'turn-on-orgstruct++)
+                                            ;(add-hook 'text-mode-hook 'turn-on-orgstruct++)
 
 
     (rk/add-local-lib-to-path "ox-hugo")
@@ -872,31 +917,79 @@ Enable speed keys, as they can be quite effective. Similar in spirit to hydras.
                      (org-present-show-cursor)
                      (org-present-read-write)))))
 
+#+end_src
 
+** Deft
 
-    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    ;;; Deft
+#+begin_src emacs-lisp
+  (use-package deft
+    :after org
+    :bind
+    ("C-c n d" . deft)
+    :custom
+    (deft-directory rk/notes-dir)
+    (deft-extensions '("org"))
+    (deft-default-extension "org")
+    (deft-text-mode 'org-mode)
+    (deft-use-filename-as-title t)
+    (deft-use-filter-string-for-filename t)
+    (deft-recursive t)
+    (deft-auto-save-interval 0))
 
-    (require 'deft)
-    (setq deft-directory "~/Drives/Dropbox (Personal)/Notes/")
-    (setq deft-extensions '("org"))
-    (setq deft-default-extension "org")
-    (setq deft-text-mode 'org-mode)
-    (setq deft-use-filename-as-title t)
-    (setq deft-use-filter-string-for-filename t)
-    (setq deft-auto-save-interval 0)  ;;key to launch deft
-    (global-set-key (kbd "C-c d") 'deft)
+  (defun rk/deft-strip-spaces (args)
+    "Replace spaces with - in the string contained in the first
+     element of the list args. Used to advise deft's file naming
+     function."
+    (list (replace-regexp-in-string " " "-" (car args))))
 
-    (defun rk/deft-strip-spaces (args)
-      "Replace spaces with - in the string contained in the first
-       element of the list args. Used to advise deft's file naming
-       function."
-      (list (replace-regexp-in-string " " "-" (car args))))
+  (advice-add 'deft-new-file-named :filter-args #'rk/deft-strip-spaces)
 
-    (advice-add 'deft-new-file-named :filter-args #'rk/deft-strip-spaces)
+#+end_src
 
-    ;(provide 'setup-org)
+** Org-Roam
 
+#+begin_src emacs-lisp :tangle yes
+  (use-package org-roam
+        :hook 
+        (after-init . org-roam-mode)
+        :straight (:host github :repo "org-roam/org-roam" :branch "master")
+        :custom
+        (org-roam-directory (concat rk/org-base-dir "/roam/"))
+        :bind (:map org-roam-mode-map
+                (("C-c n n" . org-roam)
+                 ("C-c n f" . org-roam-find-file)
+                 ("C-c n b" . org-roam-switch-to-buffer)
+                 ("C-c n g" . org-roam-show))
+                :map org-mode-map
+                (("C-c n i" . org-roam-insert)
+                 ("C-c n I" . org-roam-insert-immediate))))
+#+end_src
+
+** Org-journal
+
+#+begin_src emacs-lisp
+  ; https://github.com/bastibe/org-journal.git
+  (use-package org-journal
+        :ensure t 
+        :defer t
+        :hook 
+        (after-init . org-journal-mode)
+        :straight (:host github :repo "bastibe/org-journal" :branch "master")
+        :custom
+        (org-journal-dir rk/notes-dir)
+        (org-journal-find-file 'find-file)
+        (org-journal-date-prefix "#+title: ")
+        (org-journal-date-format "%a %d-%m-%Y")
+        (org-journal-file-type 'monthly) ; 'daily (default) 'weekly 'monthly 'yearly
+  ;      (org-journal-enable-encryption t)
+  ;      (org-journal-encrypt-journal t)
+        :bind (:map org-journal-mode-map
+                (("C-c j s" . org-journal-search)
+                 ("C-c j f" . org-journal-open-next-entry))
+                :map global-map
+                (("C-c n j" . org-journal-new-entry)
+  ;               ("C-c j b" . org-journal-open-previous-entry)
+                )))
 #+end_src
 
 ** OKR updates
@@ -963,49 +1056,49 @@ Enable speed keys, as they can be quite effective. Similar in spirit to hydras.
   (rk/create-open-file-shortcut "T" (concat rk/org-base-dir "/todo.org"))
 #+end_src
 
-* Setup SmartParens
-
-#+begin_src emacs-lisp
-(require 'smartparens-config)
-(add-hook 'org-mode-hook #'smartparens-mode)
-#+end_src
-
 * Global shortcuts and keyboard remaps
 
 #+begin_src emacs-lisp
-(global-set-key (kbd "M-/") 'hippie-expand)
-(global-set-key (kbd "C-x C-b") 'ibuffer)
+  (global-set-key (kbd "M-/") 'hippie-expand)
+  (global-set-key (kbd "C-x C-b") 'ibuffer)
 
-;(global-set-key (kbd "C-s") 'isearch-forward-regexp)
-(global-set-key (kbd "C-r") 'isearch-backward-regexp)
-(global-set-key (kbd "C-M-s") 'isearch-forward)
-(global-set-key (kbd "C-M-r") 'isearch-backward)
+  ;(global-set-key (kbd "C-s") 'isearch-forward-regexp)
+  (global-set-key (kbd "C-r") 'isearch-backward-regexp)
+  (global-set-key (kbd "C-M-s") 'isearch-forward)
+  (global-set-key (kbd "C-M-r") 'isearch-backward)
 
-(global-set-key (kbd "M-%") 'query-replace-regexp)
-(global-set-key (kbd "C-M-%") 'query-replace-regexp)
+  (global-set-key (kbd "M-%") 'query-replace-regexp)
+  (global-set-key (kbd "C-M-%") 'query-replace-regexp)
 
-;(global-set-key "\C-x\C-r" 'recentf-open-files) ; I hate the default binding anyw ;; replaced by ivy-recentf, see setup-ivy.el
+  ;(global-set-key "\C-x\C-r" 'recentf-open-files) ; I hate the default binding anyw ;; replaced by ivy-recentf, see setup-ivy.el
 
-; Change the annoying defaults
-(global-set-key "\C-z" 'undo)
-; Another annoying one
-(global-set-key [insert] nil)
+  ; Change the annoying defaults
+  (global-set-key "\C-z" 'undo)
+  ; Another annoying one
+  (global-set-key [insert] nil)
 
-; Alternatives to M-x
-(global-set-key "\C-x\C-m" 'execute-extended-command)
-(global-set-key "\C-c\C-m" 'execute-extended-command)
+  ; Alternatives to M-x
+  (global-set-key "\C-x\C-m" 'execute-extended-command)
+  (global-set-key "\C-c\C-m" 'execute-extended-command)
 
-; more annoyance with the default bindings
-(global-set-key [end] 'forward-word) ; instead of end-of-buffer
-(global-set-key [home] 'backward-word) ; instead of beginning-of-buffer
+  ; more annoyance with the default bindings
+  (global-set-key [end] 'forward-word) ; instead of end-of-buffer
+  (global-set-key [home] 'backward-word) ; instead of beginning-of-buffer
 
-; see rk-functions.el
-(global-set-key "\C-\M-q" 'rk/unfill-paragraph)
-(global-set-key "\M-q" 'rk/fill-or-unfill-paragraph)
+  ; see rk-functions.el
+  (global-set-key "\C-\M-q" 'rk/unfill-paragraph)
+  (global-set-key "\M-q" 'rk/fill-or-unfill-paragraph)
 
 
-(global-set-key (kbd "C-M-2") 'mark-sexp) ;; C-M-@ does not work on OSX
-(global-set-key (kbd "<F4>") 'recompile)
+  (global-set-key (kbd "C-M-2") 'mark-sexp) ;; C-M-@ does not work on OSX
+  (global-set-key (kbd "<f4>") 'recompile)
+
+  (defun rk/change-to-nl-spelling ()
+    "Set spelling to nl_NL"
+    (interactive)
+    (ispell-change-dictionary "nl_NL"))
+
+  (global-set-key (kbd "<f8>") 'rk/change-to-nl-spelling)
 
 #+end_src
 
@@ -1052,6 +1145,13 @@ The following is simply copied from the [[https://oremacs.com/swiper/#introducti
 (define-key ivy-minibuffer-map (kbd "M-<return>") 'ivy-done)
 ;(define-key read-expression-map (kbd "C-r") 'counsel-expression-history)
 #+end_src
+
+Some commands are intended to be called only via their key binding. Make them disappear from counsel-M-x like this:
+
+#+begin_src emacs-lisp
+(put 'counsel-find-symbol 'no-counsel-M-x t)
+#+end_src
+
 
 Ignore dotfiles.
 
@@ -1453,13 +1553,13 @@ Transpose for many objects.
 
 (setq rk/yashome (concat emacs-local "/yasnippet"))
 (setq rk/yas-my-snippets (concat emacs-root "/snippets"))
-(setq rk/yas-default-snippets (concat rk/yashome "/snippets"))
-(setq rk/yas-yasmate-snippets (concat rk/yashome "/yasmate/snippets"))
+(setq rk/yas-snippets (concat emacs-local "/yasnippet-snippets/snippets"))
+
 
 (setq yas-snippet-dirs
       (list rk/yas-my-snippets
-            rk/yas-yasmate-snippets
-            rk/yas-default-snippets))
+            rk/yas-snippets))
+
 
 (yas-global-mode 1)
 
@@ -1478,19 +1578,21 @@ Transpose for many objects.
 
 ** Install and configure via use-package
 
+I don't use it at the moment. Disabled.
+
 #+begin_src emacs-lisp
-(use-package projectile
-  :ensure t
-  :config
+;(use-package projectile
+;  :ensure t
+;  :config
 ;  (define-key projectile-mode-map (kbd "s-p") 'projectile-command-map) ; no Super on my OSX please
-  (define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map)
-  (projectile-mode t))
+;  (define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map)
+;  (projectile-mode t))
 #+end_src
 
 ** Enable it for my org files
 
 #+begin_src emacs-lisp
-(setq projectile-project-search-path '("~/org/" "~/Coding/"))
+;(setq projectile-project-search-path '("~/org/" "~/Coding/"))
 #+end_src
 
 * Rust
@@ -1531,12 +1633,31 @@ package-refreshes). So instead, I'll just clone the repository.
 
 * Clojure
 
+Always start the smartparens-mode. The `sp--update-override-key-bindings` I found at https://www.reddit.com/r/emacs/comments/3dn226/help_with_smartparens_and_overriding_bindings/
+
 #+begin_src emacs-lisp
-  (add-hook 'clojure-mode-hook
-            (lambda ()
-              (turn-on-smartparens-mode)))
+  (add-hook 'clojure-mode-hook (lambda ()
+                                 (turn-on-smartparens-mode)
+                                 (sp--update-override-key-bindings)))
+  (require 'smartparens-clojure)
 #+end_src
+
 * Experiments
+
+** Increase number at point
+
+#+begin_src emacs-lisp
+  (rk/add-local-lib-to-path "evil-numbers")
+  (require 'evil-numbers)
+  (global-set-key (kbd "C-c +") 'evil-numbers/inc-at-pt)
+  (global-set-key (kbd "C-c -") 'evil-numbers/dec-at-pt)
+
+#+end_src
+** Ace-window
+
+#+begin_src emacs-lisp
+  (global-set-key (kbd "M-o") 'ace-window)
+#+end_src
 
 ** See https://stackoverflow.com/questions/25188206/how-do-you-write-an-emacs-lisp-function-to-replace-a-word-at-point
 
@@ -1554,20 +1675,16 @@ package-refreshes). So instead, I'll just clone the repository.
         (insert unhexed))))
 #+end_src
 
-
 ** TexLive path
 #+begin_src emacs-lisp
 (setenv "PATH" (concat (getenv "PATH") ":/Library/Tex/texbin"))
 #+end_src
 
-* misc
+* Automatically added and local variable
 
 ** Automatically added stuff
 
 #+begin_src emacs-lisp
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
 (put 'downcase-region 'disabled nil)
 (put 'upcase-region 'disabled nil)
 (custom-set-variables
@@ -1591,8 +1708,20 @@ package-refreshes). So instead, I'll just clone the repository.
  )
 (put 'narrow-to-page 'disabled nil)
 
-
 #+end_src
 
+** Allowed local variables
 
+#+begin_src emacs-lisp
+
+  (dolist (pair
+           '((ispell-dictionary       . stringp)
+             (ispell-local-dictionary . stringp)
+             (auto-fill-mode          . booleanp)
+             (fill-column             . numberp)
+  ;;         (variable-name           . type-name)
+             )) ;; C source code
+    (put (car pair) 'safe-local-variable (cdr pair)))
+
+#+end_src
 
